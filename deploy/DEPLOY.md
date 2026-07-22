@@ -7,8 +7,7 @@ and Storefront are free; the plugin is ours.
 ## Prerequisites (one-time, admin side)
 
 1. **Server** with Docker and a running nginx-proxy (like the ampli* servers).
-2. **DNS**: an A record `demo-wp.ampliapps.com` (or another chosen domain) -> server IP.
-   There is no `*.ampliapps.com` wildcard - the record must be added explicitly.
+2. **DNS**: `las-demo-wordpress.ampliapps.com` -> `51.38.157.250` (already in place).
 3. **SSH access** for the deploy operator.
 
 ## Steps

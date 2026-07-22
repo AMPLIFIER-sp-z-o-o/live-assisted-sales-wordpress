@@ -13,8 +13,9 @@ Estimated time: ~15 minutes.
 - A server with Docker Compose v2 and our standard **nginx-proxy** stack running
   (Let's Encrypt companion, external Docker network named `nginx-proxy`) - same
   setup as the ampli* customer servers.
-- **DNS**: add an A record for the store domain pointing at that server, e.g.
-  `demo-wp.ampliapps.com -> <server IP>`. There is no *.ampliapps.com wildcard.
+- **DNS**: `las-demo-wordpress.ampliapps.com` already points at `51.38.157.250`
+  (verified; that host's nginx-proxy answers 503 for the vhost, waiting for our
+  container). Deploy on that server.
 - Read access to the GitHub repo from the server (deploy key or https token).
 
 ## 2. Deploy
@@ -26,12 +27,14 @@ sudo git clone https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpre
 cd amper-las-wp
 cp deploy/.env.example deploy/.env
 vi deploy/.env
-#   WP_DOMAIN=demo-wp.ampliapps.com     <- the domain from step 1
+#   WP_DOMAIN=las-demo-wordpress.ampliapps.com
 #   DB_PASSWORD / DB_ROOT_PASSWORD      <- generate (e.g. openssl rand -hex 16)
 #   WP_ADMIN_PASSWORD                   <- generate; report it back to Adrian
 #   WP_CUSTOMER_PASSWORD=klient1234     <- demo account, keep as is
-#   LAS_API_KEY                         <- leave CHANGE_ME if you don't have it;
-#                                          it gets set later from wp-admin
+#   LAS_API_KEY                         <- the API key of the "Demo wordpress" store
+#                                          in the LAS console (Tomek's account, "Finish
+#                                          setup"); leave CHANGE_ME if you don't have
+#                                          it - it gets set later from wp-admin
 docker compose -f deploy/docker-compose.prod.yml up -d db wordpress
 docker compose -f deploy/docker-compose.prod.yml run --rm wpcli sh /provision.sh
 ```
