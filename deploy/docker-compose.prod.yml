@@ -1,0 +1,95 @@
+# Production WooCommerce demo store for AMPER LAS, following the amper-customers
+# conventions: SSL termination by the host's nginx-proxy (Let's Encrypt via
+# LETSENCRYPT_HOST), no obsolete `version:` key, external default network.
+#
+# Usage: clone the repo on the server, create deploy/.env from .env.example, then:
+#   docker compose -f deploy/docker-compose.prod.yml up -d db wordpress
+#   docker compose -f deploy/docker-compose.prod.yml run --rm wpcli sh /provision.sh
+# The plugin is bind-mounted from the repo checkout - `git pull` updates it live.
+
+services:
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: wordpress
+      MARIADB_USER: wordpress
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - internal
+    container_name: amper-las-wp-db
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  wordpress:
+    image: wordpress:php8.3-apache
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    expose:
+      - 80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      VIRTUAL_HOST: ${WP_DOMAIN}
+      LETSENCRYPT_HOST: ${WP_DOMAIN}
+      LETSENCRYPT_EMAIL: support@ampliapps.com
+      # Behind nginx-proxy TLS terminates upstream - trust X-Forwarded-Proto so WP
+      # generates https URLs (the http:// payload-URL bug seen on the b2c demo).
+      WORDPRESS_CONFIG_EXTRA: |
+        if (isset($$_SERVER['HTTP_X_FORWARDED_PROTO']) && $$_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+          $$_SERVER['HTTPS'] = 'on';
+        }
+    volumes:
+      - wp_data:/var/www/html
+      - ../plugin/amper-live-assisted-sales:/var/www/html/wp-content/plugins/amper-live-assisted-sales
+    networks:
+      - internal
+      - default
+    container_name: amper-las-wp
+
+  wpcli:
+    image: wordpress:cli-php8.3
+    # Debian wordpress image owns files as uid 33; Alpine cli www-data is 82.
+    user: "33:33"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WP_DOMAIN: ${WP_DOMAIN}
+      WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
+      WP_CUSTOMER_PASSWORD: ${WP_CUSTOMER_PASSWORD}
+      LAS_SERVER_URL: ${LAS_SERVER_URL}
+      LAS_PUBLIC_URL: ${LAS_PUBLIC_URL}
+      LAS_API_KEY: ${LAS_API_KEY}
+    volumes:
+      - wp_data:/var/www/html
+      - ../plugin/amper-live-assisted-sales:/var/www/html/wp-content/plugins/amper-live-assisted-sales
+      - ./provision-prod.sh:/provision.sh:ro
+    networks:
+      - internal
+      - default
+    profiles: ["tools"]
+
+volumes:
+  db_data:
+  wp_data:
+
+networks:
+  internal:
+  default:
+    name: nginx-proxy
+    external: true

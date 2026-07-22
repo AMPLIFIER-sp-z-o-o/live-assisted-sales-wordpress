@@ -1,0 +1,13 @@
+# Normalize line endings; shell scripts must stay LF (they run inside Linux containers).
+* text=auto
+*.sh text eol=lf
+*.php text eol=lf
+*.js text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.po text eol=lf
+*.pot text eol=lf
+*.mo binary
+*.png binary
+*.jpg binary
+*.zip binary

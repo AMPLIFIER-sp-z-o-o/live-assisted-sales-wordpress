@@ -1,0 +1,118 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: AMPER Live Assisted Sales 1.0.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: \n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Domain: amper-las\n"
+
+msgid "AMPER Live Assisted Sales requires WooCommerce to be installed and active."
+msgstr ""
+
+msgid "Live Assisted Sales"
+msgstr ""
+
+msgid "AMPER Live Assisted Sales"
+msgstr ""
+
+msgid "Connect your store to the AMPER Live Assisted Sales console: live visitor activity, purchase-intent scoring and a chat widget with AI assistance."
+msgstr ""
+
+msgid "Integration enabled"
+msgstr ""
+
+msgid "Send events to Live Assisted Sales and show the chat widget"
+msgstr ""
+
+msgid "LAS platform address"
+msgstr ""
+
+msgid "The AMPER Live Assisted Sales platform address, e.g. https://live-assisted-sales.com."
+msgstr ""
+
+msgid "Public widget address (advanced)"
+msgstr ""
+
+msgid "Only needed when your server reaches LAS through a different address than your visitors' browsers (e.g. Docker or an internal network). Leave empty to use the platform address above."
+msgstr ""
+
+msgid "Store API key"
+msgstr ""
+
+msgid "Paste the key from your store's page in the AMPER LAS console."
+msgstr ""
+
+msgid "Chat widget accent color"
+msgstr ""
+
+msgid "Optional. A CSS color (e.g. #2563eb) for the chat bubble; leave empty for the default."
+msgstr ""
+
+msgid "Chat widget logo URL"
+msgstr ""
+
+msgid "Optional. Leave empty to use your theme's logo."
+msgstr ""
+
+msgid "Connection status"
+msgstr ""
+
+msgid "Connected - the chat widget is active on your store."
+msgstr ""
+
+msgid "Not connected yet - save your settings, then run the connection test."
+msgstr ""
+
+msgid "Test connection"
+msgstr ""
+
+msgid "%d event is waiting to be delivered to LAS."
+msgid_plural "%d events are waiting to be delivered to LAS."
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+msgid "Testing…"
+msgstr ""
+
+msgid "Request failed."
+msgstr ""
+
+msgid "Not allowed."
+msgstr ""
+
+msgid "The AMPER LAS platform address is not set."
+msgstr ""
+
+msgid "A store API key is required. Paste the key from your store's page in the AMPER LAS console."
+msgstr ""
+
+msgid "We couldn't find that server. Check the AMPER LAS platform address - it is the AMPER platform address, not your store's own website."
+msgstr ""
+
+msgid "The AMPER LAS server address was reached but refused the connection. Confirm the address and port are correct and that the LAS platform is running."
+msgstr ""
+
+msgid "LAS connection failed: %s"
+msgstr ""
+
+msgid "Invalid store API key."
+msgstr ""
+
+msgid "LAS rejected the API key (HTTP %d)."
+msgstr ""
+
+msgid "Connection to %s works correctly."
+msgstr ""
+
+msgid "your store"
+msgstr ""
+
+msgid "Every minute (AMPER LAS outbox relay)"
+msgstr ""
+
+msgid "Added to cart:"
+msgstr ""
+
