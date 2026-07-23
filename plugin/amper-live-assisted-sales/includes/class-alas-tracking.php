@@ -108,6 +108,9 @@ class ALAS_Tracking {
 		ALAS_Dispatch::dispatch( 'add_to_cart', array(
 			'product' => ALAS_Payloads::product_payload( $product ),
 			'cart'    => ALAS_Payloads::cart_payload(),
+			// Raised from WooCommerce's background add-to-cart request, whose URL is the endpoint,
+			// not a page the shopper visited - report where they actually are.
+			'url'     => ALAS_Payloads::referring_page_url(),
 		) );
 	}
 
@@ -121,6 +124,7 @@ class ALAS_Tracking {
 		ALAS_Dispatch::dispatch( 'remove_from_cart', array(
 			'product' => $product ? ALAS_Payloads::product_payload( $product ) : array(),
 			'cart'    => ALAS_Payloads::cart_payload( $cart ),
+			'url'     => ALAS_Payloads::referring_page_url(),
 		) );
 	}
 
@@ -147,6 +151,7 @@ class ALAS_Tracking {
 		ALAS_Dispatch::dispatch( $delta > 0 ? 'add_to_cart' : 'remove_from_cart', array(
 			'product' => ALAS_Payloads::product_payload( $product ),
 			'cart'    => ALAS_Payloads::cart_payload( $cart ),
+			'url'     => ALAS_Payloads::referring_page_url(),
 		) );
 	}
 

@@ -179,6 +179,29 @@ class ALAS_Payloads {
 		return ( is_ssl() ? 'https://' : 'http://' ) . $host . $uri;
 	}
 
+	/**
+	 * The page the shopper is actually looking at.
+	 *
+	 * WooCommerce handles "add to cart" in the background (?wc-ajax=add_to_cart, admin-ajax.php,
+	 * or a POST back to the cart), so current_url() there returns the endpoint - an address the
+	 * shopper never visited, which the LAS console would otherwise show the agent as "Now on".
+	 * The referer is the real page; it is trusted only when it points back at this shop, so a
+	 * forged header cannot put an arbitrary link in front of the agent.
+	 *
+	 * @return string
+	 */
+	public static function referring_page_url() {
+		$referer = (string) wp_get_referer();
+		if ( $referer ) {
+			$referer_host = (string) wp_parse_url( $referer, PHP_URL_HOST );
+			$home_host    = (string) wp_parse_url( home_url( '/' ), PHP_URL_HOST );
+			if ( $referer_host && strcasecmp( $referer_host, $home_host ) === 0 ) {
+				return $referer;
+			}
+		}
+		return self::current_url();
+	}
+
 	// ---- Money formatting -------------------------------------------------
 
 	/** Plain-decimal amount string ("129.00") from any WooCommerce amount. */
