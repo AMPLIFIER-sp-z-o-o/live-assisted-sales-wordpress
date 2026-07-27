@@ -115,3 +115,21 @@ msgstr "Co minutę (kolejka zdarzeń AMPER LAS)"
 
 msgid "Added to cart:"
 msgstr "Dodano do koszyka:"
+
+msgid "Updates"
+msgstr "Aktualizacje"
+
+msgid "Version %s. The plugin keeps itself up to date - there is nothing to click."
+msgstr "Wersja %s. Wtyczka aktualizuje się sama - nie musisz nic klikać."
+
+msgid "Check for updates every few minutes (test stores only)"
+msgstr "Sprawdzaj aktualizacje co kilka minut (tylko sklepy testowe)"
+
+msgid "Off by default: updates are picked up within about half a day, the same rhythm WordPress uses for every other plugin. Turn this on only on a staging or demo store, where you want a change to arrive right after it is published."
+msgstr "Domyślnie wyłączone: aktualizacje docierają w ciągu mniej więcej pół dnia, czyli w tym samym rytmie, w jakim WordPress sprawdza pozostałe wtyczki. Włącz to tylko na sklepie testowym lub demonstracyjnym, gdzie zmiana ma być widoczna zaraz po opublikowaniu."
+
+msgid "AMPER LAS update check"
+msgstr "Sprawdzanie aktualizacji AMPER LAS"
+
+msgid "Could not prepare the update package."
+msgstr "Nie udało się przygotować paczki z aktualizacją."

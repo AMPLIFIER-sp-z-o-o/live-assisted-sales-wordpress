@@ -116,3 +116,21 @@ msgstr ""
 msgid "Added to cart:"
 msgstr ""
 
+
+msgid "Updates"
+msgstr ""
+
+msgid "Version %s. The plugin keeps itself up to date - there is nothing to click."
+msgstr ""
+
+msgid "Check for updates every few minutes (test stores only)"
+msgstr ""
+
+msgid "Off by default: updates are picked up within about half a day, the same rhythm WordPress uses for every other plugin. Turn this on only on a staging or demo store, where you want a change to arrive right after it is published."
+msgstr ""
+
+msgid "AMPER LAS update check"
+msgstr ""
+
+msgid "Could not prepare the update package."
+msgstr ""
