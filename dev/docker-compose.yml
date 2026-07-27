@@ -31,6 +31,7 @@ services:
     volumes:
       - wp_data:/var/www/html
       - ../plugin/amper-live-assisted-sales:/var/www/html/wp-content/plugins/amper-live-assisted-sales
+      - ../demo-plugins/amper-demo-language:/var/www/html/wp-content/plugins/amper-demo-language
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -50,6 +51,7 @@ services:
     volumes:
       - wp_data:/var/www/html
       - ../plugin/amper-live-assisted-sales:/var/www/html/wp-content/plugins/amper-live-assisted-sales
+      - ../demo-plugins/amper-demo-language:/var/www/html/wp-content/plugins/amper-demo-language
       - ./provision.sh:/provision.sh:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"

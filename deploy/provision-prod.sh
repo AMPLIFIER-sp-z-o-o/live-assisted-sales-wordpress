@@ -58,6 +58,21 @@ CHECKOUT_ID=$(wp option get woocommerce_checkout_page_id)
 [ -n "$CART_ID" ] && wp post update "$CART_ID" --post_content='<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->' >/dev/null
 [ -n "$CHECKOUT_ID" ] && wp post update "$CHECKOUT_ID" --post_content='<!-- wp:shortcode -->[woocommerce_checkout]<!-- /wp:shortcode -->' >/dev/null
 
+echo "== Front page = Shop, no starter content =="
+# A public demo that opens on "Hello world!" reads as a broken install to anyone we show it to.
+SHOP_ID=$(wp option get woocommerce_shop_page_id)
+if [ -n "$SHOP_ID" ]; then
+  wp option update show_on_front page
+  wp option update page_on_front "$SHOP_ID"
+fi
+for SLUG in hello-world sample-page; do
+  ID=$(wp post list --post_type=post,page --name="$SLUG" --field=ID --post_status=any | head -n1)
+  [ -n "$ID" ] && wp post delete "$ID" >/dev/null 2>&1 || true
+done
+
+echo "== Timezone =="
+wp option update timezone_string "Europe/Warsaw"
+
 echo "== Sample products =="
 PRODUCT_COUNT=$(wp post list --post_type=product --format=count)
 if [ "$PRODUCT_COUNT" -lt 5 ]; then
@@ -94,6 +109,9 @@ if ! wp post list --post_type=shop_coupon --title=las10 --format=count | grep -q
   wp wc shop_coupon create --code=las10 --amount=10 --discount_type=percent \
     --description="Kupon testowy LAS -10%" --user="$ADMIN_USER" >/dev/null 2>&1 || true
 fi
+
+echo "== Bilingual storefront (PL/EN by browser + header switcher) =="
+wp plugin activate amper-demo-language
 
 echo "== AMPER LAS plugin =="
 wp plugin activate amper-live-assisted-sales

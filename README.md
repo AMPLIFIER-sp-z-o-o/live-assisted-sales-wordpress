@@ -10,7 +10,11 @@ buy-from-chat.
 ## Layout
 
 - `plugin/amper-live-assisted-sales/` - the plugin (mount or zip this).
-- `build-zip.ps1` / `build-zip.sh` - build `dist/amper-live-assisted-sales.zip` for Plugins -> Add New -> Upload (CI: Jenkins).
+- `demo-plugins/amper-demo-language/` - demo-store helper: serves the storefront in Polish or
+  English (browser language by default, PL/EN switcher in the Storefront header). Interface only -
+  the catalog stays WooCommerce's English sample data, so no content duplication and no paid
+  multilingual add-on.
+- `build-zip.ps1` / `build-zip.sh` - build `dist/*.zip` for Plugins -> Add New -> Upload (CI: Jenkins).
 - `dev/docker-compose.yml` - MariaDB + WordPress (port **8003**) + wp-cli, with the plugin bind-mounted.
 - `dev/provision.sh` - idempotent store setup (WooCommerce + Storefront + sample catalog + PLN/pl_PL + shipping/payments/customer/coupon + plugin config + LAS connection test).
 - `dev/tests/` - backend test suites (78 wp-cli unit tests, 12 REST edge cases, 20 LAS-parity checks).
@@ -33,6 +37,22 @@ docker compose run --rm -e LAS_API_KEY \
 ```
 
 (Git Bash on Windows: prefix the `run` command with `MSYS_NO_PATHCONV=1`.)
+
+## Public demo store (production)
+
+| What | Value |
+|---|---|
+| Storefront | https://las-wordpress-demo.ampliapps.com (WordPress 7.0, PHP 8.5, managed hosting - **not** the `deploy/` compose stack) |
+| wp-admin | `las-admin` (login link is guarded by a host-side token URL) |
+| LAS console | https://live-assisted-sales.com, store **Demo WooCommerce** (id 2) on the `tenant1@example.com` workspace |
+| Plugin install | `dist/*.zip` via Plugins -> Add New -> Upload (no SSH/wp-cli on that host, so `provision-prod.sh` does not apply there) |
+| Store API key | wp-admin -> WooCommerce -> Live Assisted Sales; source of truth is the store's settings page in the console |
+
+Provisioned to match the local store 1:1 (pl_PL + Europe/Warsaw, Storefront, PLN with space/comma
+separators, taxes off, 18 sample products + 7 variations, classic shortcode cart/checkout, zone
+Polska with Kurier 15 zl + free over 200 zl, COD + bank transfer, `klient@example.com`, coupon
+`las10`), plus two deliberate demo touches now also in both provisioning scripts: front page = Shop
+and no "Hello world!" starter content.
 
 ## Logins / credentials
 
