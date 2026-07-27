@@ -164,7 +164,10 @@ class ALAS_Updater {
 		if ( ! is_object( $transient ) ) {
 			return $transient;
 		}
-		$headers = self::remote_headers();
+		// "Check again" on the Updates screen must mean it: without this the half-day cache would
+		// answer with yesterday's version and the button would look broken.
+		$forced  = ! empty( $_GET['force-check'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$headers = self::remote_headers( $forced );
 		$remote  = $headers['version'];
 		if ( ! $remote || ! version_compare( $remote, AMPER_LAS_VERSION, '>' ) ) {
 			return $transient;
