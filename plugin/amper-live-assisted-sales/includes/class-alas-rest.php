@@ -109,10 +109,34 @@ class ALAS_Rest {
 			&& (string) $origin_port === (string) $home_port;
 	}
 
+	/**
+	 * Restore the logged-in shopper for this request.
+	 *
+	 * WordPress drops cookie authentication on REST requests that carry no X-WP-Nonce
+	 * (rest_cookie_check_errors sets the current user to 0), and the tracker deliberately sends
+	 * none: it fires from cached pages and via sendBeacon, where a 12-24h nonce would go stale.
+	 * The consequence was that every browser-side event (select_item, session_start, scroll_depth,
+	 * page_ping, session_end) reported metadata.user as anonymous even while the shopper was
+	 * signed in - the SERVER-side events on the very same visit carried their e-mail, so one
+	 * customer showed up as two people in the console. Validate the logged-in cookie ourselves;
+	 * it grants no extra privileges (this endpoint writes nothing to WordPress) and only affects
+	 * the identity attached to outgoing events.
+	 */
+	private static function restore_cookie_user() {
+		if ( is_user_logged_in() ) {
+			return;
+		}
+		$user_id = wp_validate_auth_cookie( '', 'logged_in' );
+		if ( $user_id ) {
+			wp_set_current_user( (int) $user_id );
+		}
+	}
+
 	public static function handle( WP_REST_Request $request ) {
 		if ( ! self::is_same_origin( $request ) ) {
 			return new WP_REST_Response( array( 'ok' => false, 'detail' => 'Cross-origin event requests are not allowed.' ), 403 );
 		}
+		self::restore_cookie_user();
 
 		$body = (string) $request->get_body();
 		if ( strlen( $body ) > self::MAX_PAYLOAD_BYTES ) {
