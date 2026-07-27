@@ -32,7 +32,17 @@ class ALAS_Updater {
 	 *  often than that across admin page loads, so the answer is cached for half a day. */
 	const CACHE_TTL        = 12 * HOUR_IN_SECONDS;
 
+	const CRON_HOOK = 'amper_las_check_update';
+
 	public static function init() {
+		// WordPress looks for updates twice a day, so a fix pushed at noon could sit unseen until
+		// the evening. This integration is meant to run itself, so it checks hourly instead - the
+		// gap between "the fix exists" and "the shop has it" is the whole point of shipping this way.
+		add_action( self::CRON_HOOK, array( __CLASS__, 'check_and_update_now' ) );
+		if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
+			wp_schedule_event( time() + MINUTE_IN_SECONDS, 'hourly', self::CRON_HOOK );
+		}
+
 		// Both hooks on purpose: `pre_set_…` fires only when WordPress refreshes the transient
 		// (roughly twice a day), while `site_transient_…` also runs on every read - so the update
 		// shows up on the Plugins screen right away instead of after the next refresh.
@@ -47,6 +57,39 @@ class ALAS_Updater {
 
 	public static function flush_cache() {
 		delete_site_transient( self::VERSION_CACHE_KEY );
+	}
+
+	/**
+	 * Hourly: look for a newer version and, if there is one, install it there and then.
+	 *
+	 * Deliberately narrower than core's own unattended pass, which updates everything on the site
+	 * that has auto-updates on: this store's other plugins are not ours to hurry along. Only our
+	 * own entry is handed to WP_Automatic_Updater, so the install still runs through core's
+	 * machinery - its compatibility checks, its rollback when the new version fatals on activation,
+	 * its notification mail - and nothing else on the shop is touched.
+	 */
+	public static function check_and_update_now() {
+		self::flush_cache();
+		if ( ! function_exists( 'wp_update_plugins' ) ) {
+			require_once ABSPATH . 'wp-includes/update.php';
+		}
+		wp_update_plugins();
+
+		$updates = get_site_transient( 'update_plugins' );
+		$item    = is_object( $updates ) && isset( $updates->response[ self::basename() ] )
+			? $updates->response[ self::basename() ]
+			: null;
+		if ( ! $item ) {
+			return;
+		}
+		require_once ABSPATH . 'wp-admin/includes/admin.php';
+		require_once ABSPATH . 'wp-admin/includes/class-wp-upgrader.php';
+		$updater = new WP_Automatic_Updater();
+		// Honours the site's own kill switches too (WP_AUTO_UPDATE_CORE, DISALLOW_FILE_MODS,
+		// automatic_updater_disabled): a store that forbids unattended updates keeps forbidding them.
+		if ( $updater->should_update( 'plugin', $item, WP_PLUGIN_DIR ) ) {
+			$updater->update( 'plugin', $item );
+		}
 	}
 
 	private static function basename() {
