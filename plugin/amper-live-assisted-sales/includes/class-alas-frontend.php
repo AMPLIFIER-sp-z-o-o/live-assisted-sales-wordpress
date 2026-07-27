@@ -39,7 +39,7 @@ class ALAS_Frontend {
 			);
 			wp_localize_script( 'amper-las-cart-bridge', 'amperLasCartBridge', array(
 				'ajaxUrl' => class_exists( 'WC_AJAX' ) ? WC_AJAX::get_endpoint( 'add_to_cart' ) : '',
-				'addedMessage' => __( 'Added to cart:', 'amper-las' ),
+				'addedMessage' => __( 'Added to cart:', 'amper-live-assisted-sales' ),
 			) );
 		}
 	}

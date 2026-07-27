@@ -22,6 +22,9 @@ class ALAS_Settings {
 	const OPTION_TEST_AT         = 'amper_las_last_test_at';
 	const OPTION_FAST_UPDATES    = 'amper_las_fast_updates';
 
+	/** The one address every customer needs. Leaving the field blank made each of them type it. */
+	const DEFAULT_BASE_URL = 'https://live-assisted-sales.com';
+
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'register_menu' ), 60 );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
@@ -36,7 +39,7 @@ class ALAS_Settings {
 
 	/** Base URL the SERVER uses to reach LAS (may be an internal address, e.g. inside Docker). */
 	public static function base_url() {
-		return untrailingslashit( trim( (string) get_option( self::OPTION_BASE_URL, '' ) ) );
+		return untrailingslashit( trim( (string) get_option( self::OPTION_BASE_URL, self::DEFAULT_BASE_URL ) ) );
 	}
 
 	/** Base URL the BROWSER uses (widget script/iframe). Falls back to the server base URL. */
@@ -94,8 +97,8 @@ class ALAS_Settings {
 	public static function register_menu() {
 		add_submenu_page(
 			'woocommerce',
-			__( 'Live Assisted Sales', 'amper-las' ),
-			__( 'Live Assisted Sales', 'amper-las' ),
+			__( 'Live Assisted Sales', 'amper-live-assisted-sales' ),
+			__( 'Live Assisted Sales', 'amper-live-assisted-sales' ),
 			'manage_woocommerce',
 			'amper-las',
 			array( __CLASS__, 'render_page' )
@@ -124,8 +127,24 @@ class ALAS_Settings {
 		$pending    = ALAS_Outbox::pending_count();
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'AMPER Live Assisted Sales', 'amper-las' ); ?></h1>
-			<p><?php esc_html_e( 'Connect your store to the AMPER Live Assisted Sales console: live visitor activity, purchase-intent scoring and a chat widget with AI assistance.', 'amper-las' ); ?></p>
+			<h1><?php esc_html_e( 'AMPER Live Assisted Sales', 'amper-live-assisted-sales' ); ?></h1>
+			<p><?php esc_html_e( 'Connect your store to the AMPER Live Assisted Sales console: live visitor activity, purchase-intent scoring and a chat widget with AI assistance.', 'amper-live-assisted-sales' ); ?></p>
+
+			<?php if ( ! $public_key ) : ?>
+				<div class="card" style="max-width:640px;padding:16px 20px;margin:16px 0;">
+					<h2 style="margin-top:0;"><?php esc_html_e( 'Connect your store', 'amper-live-assisted-sales' ); ?></h2>
+					<p><?php esc_html_e( 'One click. You will sign in at live-assisted-sales.com (or create a free account), confirm this store, and come straight back - the key is saved for you.', 'amper-live-assisted-sales' ); ?></p>
+					<p>
+						<a href="<?php echo esc_url( ALAS_Connect::start_url() ); ?>" class="button button-primary button-hero">
+							<?php esc_html_e( 'Connect to AMPER LAS', 'amper-live-assisted-sales' ); ?>
+						</a>
+					</p>
+					<p class="description">
+						<?php esc_html_e( 'No account yet? You create one on the way - the first 7 days are free.', 'amper-live-assisted-sales' ); ?>
+						<?php esc_html_e( 'Prefer to do it by hand? Paste your store API key below and run the connection test.', 'amper-live-assisted-sales' ); ?>
+					</p>
+				</div>
+			<?php endif; ?>
 
 			<?php if ( $message ) : ?>
 				<div class="notice <?php echo $status === 'success' ? 'notice-success' : 'notice-error'; ?> inline">
@@ -142,80 +161,83 @@ class ALAS_Settings {
 				<?php settings_fields( 'amper_las' ); ?>
 				<table class="form-table" role="presentation">
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Integration enabled', 'amper-las' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Integration enabled', 'amper-live-assisted-sales' ); ?></th>
 						<td>
 							<label>
 								<input type="checkbox" name="<?php echo esc_attr( self::OPTION_ENABLED ); ?>" value="yes" <?php checked( self::is_enabled() ); ?> />
-								<?php esc_html_e( 'Send events to Live Assisted Sales and show the chat widget', 'amper-las' ); ?>
+								<?php esc_html_e( 'Send events to Live Assisted Sales and show the chat widget', 'amper-live-assisted-sales' ); ?>
 							</label>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="amper_las_base_url"><?php esc_html_e( 'LAS platform address', 'amper-las' ); ?></label></th>
+						<th scope="row"><label for="amper_las_base_url"><?php esc_html_e( 'LAS platform address', 'amper-live-assisted-sales' ); ?></label></th>
 						<td>
-							<input type="url" class="regular-text" id="amper_las_base_url" name="<?php echo esc_attr( self::OPTION_BASE_URL ); ?>" value="<?php echo esc_attr( get_option( self::OPTION_BASE_URL, '' ) ); ?>" placeholder="https://live-assisted-sales.com" />
-							<p class="description"><?php esc_html_e( 'The AMPER Live Assisted Sales platform address, e.g. https://live-assisted-sales.com.', 'amper-las' ); ?></p>
+							<input type="url" class="regular-text" id="amper_las_base_url" name="<?php echo esc_attr( self::OPTION_BASE_URL ); ?>" value="<?php echo esc_attr( get_option( self::OPTION_BASE_URL, self::DEFAULT_BASE_URL ) ); ?>" placeholder="<?php echo esc_attr( self::DEFAULT_BASE_URL ); ?>" />
+							<p class="description"><?php esc_html_e( 'The AMPER Live Assisted Sales platform address, e.g. https://live-assisted-sales.com.', 'amper-live-assisted-sales' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="amper_las_public_base_url"><?php esc_html_e( 'Public widget address (advanced)', 'amper-las' ); ?></label></th>
+						<th scope="row"><label for="amper_las_public_base_url"><?php esc_html_e( 'Public widget address (advanced)', 'amper-live-assisted-sales' ); ?></label></th>
 						<td>
 							<input type="url" class="regular-text" id="amper_las_public_base_url" name="<?php echo esc_attr( self::OPTION_PUBLIC_BASE_URL ); ?>" value="<?php echo esc_attr( get_option( self::OPTION_PUBLIC_BASE_URL, '' ) ); ?>" />
-							<p class="description"><?php esc_html_e( 'Only needed when your server reaches LAS through a different address than your visitors\' browsers (e.g. Docker or an internal network). Leave empty to use the platform address above.', 'amper-las' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Only needed when your server reaches LAS through a different address than your visitors\' browsers (e.g. Docker or an internal network). Leave empty to use the platform address above.', 'amper-live-assisted-sales' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="amper_las_api_key"><?php esc_html_e( 'Store API key', 'amper-las' ); ?></label></th>
+						<th scope="row"><label for="amper_las_api_key"><?php esc_html_e( 'Store API key', 'amper-live-assisted-sales' ); ?></label></th>
 						<td>
 							<input type="password" class="regular-text" id="amper_las_api_key" name="<?php echo esc_attr( self::OPTION_API_KEY ); ?>" value="<?php echo esc_attr( self::api_key() ); ?>" autocomplete="off" />
-							<p class="description"><?php esc_html_e( 'Paste the key from your store\'s page in the AMPER LAS console.', 'amper-las' ); ?></p>
+							<p class="description">
+							<?php esc_html_e( 'Paste the key from your store\'s page in the AMPER LAS console.', 'amper-live-assisted-sales' ); ?>
+							<a href="<?php echo esc_url( self::base_url() . '/stores/' ); ?>" target="_blank" rel="noopener noreferrer"><?php esc_html_e( 'Open the console', 'amper-live-assisted-sales' ); ?></a>
+						</p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="amper_las_widget_accent"><?php esc_html_e( 'Chat widget accent color', 'amper-las' ); ?></label></th>
+						<th scope="row"><label for="amper_las_widget_accent"><?php esc_html_e( 'Chat widget accent color', 'amper-live-assisted-sales' ); ?></label></th>
 						<td>
 							<input type="text" class="regular-text" id="amper_las_widget_accent" name="<?php echo esc_attr( self::OPTION_WIDGET_ACCENT ); ?>" value="<?php echo esc_attr( self::widget_accent() ); ?>" placeholder="#2563eb" />
-							<p class="description"><?php esc_html_e( 'Optional. A CSS color (e.g. #2563eb) for the chat bubble; leave empty for the default.', 'amper-las' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Optional. A CSS color (e.g. #2563eb) for the chat bubble; leave empty for the default.', 'amper-live-assisted-sales' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><label for="amper_las_widget_logo"><?php esc_html_e( 'Chat widget logo URL', 'amper-las' ); ?></label></th>
+						<th scope="row"><label for="amper_las_widget_logo"><?php esc_html_e( 'Chat widget logo URL', 'amper-live-assisted-sales' ); ?></label></th>
 						<td>
 							<input type="url" class="regular-text" id="amper_las_widget_logo" name="<?php echo esc_attr( self::OPTION_WIDGET_LOGO ); ?>" value="<?php echo esc_attr( get_option( self::OPTION_WIDGET_LOGO, '' ) ); ?>" />
-							<p class="description"><?php esc_html_e( 'Optional. Leave empty to use your theme\'s logo.', 'amper-las' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Optional. Leave empty to use your theme\'s logo.', 'amper-live-assisted-sales' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Updates', 'amper-las' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Updates', 'amper-live-assisted-sales' ); ?></th>
 						<td>
 							<p class="description" style="margin-bottom:6px;">
 								<?php
 								/* translators: %s: currently installed plugin version. */
-								echo esc_html( sprintf( __( 'Version %s. The plugin keeps itself up to date - there is nothing to click.', 'amper-las' ), AMPER_LAS_VERSION ) );
+								echo esc_html( sprintf( __( 'Version %s. The plugin keeps itself up to date - there is nothing to click.', 'amper-live-assisted-sales' ), AMPER_LAS_VERSION ) );
 								?>
 							</p>
 							<label>
 								<input type="checkbox" name="<?php echo esc_attr( self::OPTION_FAST_UPDATES ); ?>" value="yes" <?php checked( ALAS_Updater::fast_checks_enabled() ); ?> />
-								<?php esc_html_e( 'Check for updates every few minutes (test stores only)', 'amper-las' ); ?>
+								<?php esc_html_e( 'Check for updates every few minutes (test stores only)', 'amper-live-assisted-sales' ); ?>
 							</label>
-							<p class="description"><?php esc_html_e( 'Off by default: updates are picked up within about half a day, the same rhythm WordPress uses for every other plugin. Turn this on only on a staging or demo store, where you want a change to arrive right after it is published.', 'amper-las' ); ?></p>
+							<p class="description"><?php esc_html_e( 'Off by default: updates are picked up within about half a day, the same rhythm WordPress uses for every other plugin. Turn this on only on a staging or demo store, where you want a change to arrive right after it is published.', 'amper-live-assisted-sales' ); ?></p>
 						</td>
 					</tr>
 					<tr>
-						<th scope="row"><?php esc_html_e( 'Connection status', 'amper-las' ); ?></th>
+						<th scope="row"><?php esc_html_e( 'Connection status', 'amper-live-assisted-sales' ); ?></th>
 						<td>
 							<?php if ( $public_key ) : ?>
-								<p><span style="color:#00a32a;font-weight:600;">&#9679;</span> <?php esc_html_e( 'Connected - the chat widget is active on your store.', 'amper-las' ); ?></p>
+								<p><span style="color:#00a32a;font-weight:600;">&#9679;</span> <?php esc_html_e( 'Connected - the chat widget is active on your store.', 'amper-live-assisted-sales' ); ?></p>
 							<?php else : ?>
-								<p><span style="color:#d63638;font-weight:600;">&#9679;</span> <?php esc_html_e( 'Not connected yet - save your settings, then run the connection test.', 'amper-las' ); ?></p>
+								<p><span style="color:#d63638;font-weight:600;">&#9679;</span> <?php esc_html_e( 'Not connected yet - save your settings, then run the connection test.', 'amper-live-assisted-sales' ); ?></p>
 							<?php endif; ?>
-							<button type="button" class="button" id="amper-las-test-btn"><?php esc_html_e( 'Test connection', 'amper-las' ); ?></button>
+							<button type="button" class="button" id="amper-las-test-btn"><?php esc_html_e( 'Test connection', 'amper-live-assisted-sales' ); ?></button>
 							<span id="amper-las-test-result" style="margin-left:8px;"></span>
 							<?php if ( $pending > 0 ) : ?>
 								<p class="description">
 									<?php
 									/* translators: %d: number of queued events. */
-									echo esc_html( sprintf( _n( '%d event is waiting to be delivered to LAS.', '%d events are waiting to be delivered to LAS.', $pending, 'amper-las' ), $pending ) );
+									echo esc_html( sprintf( _n( '%d event is waiting to be delivered to LAS.', '%d events are waiting to be delivered to LAS.', $pending, 'amper-live-assisted-sales' ), $pending ) );
 									?>
 								</p>
 							<?php endif; ?>
@@ -231,7 +253,7 @@ class ALAS_Settings {
 			if (!btn) return;
 			btn.addEventListener("click", function () {
 				var out = document.getElementById("amper-las-test-result");
-				out.textContent = <?php echo wp_json_encode( __( 'Testing…', 'amper-las' ) ); ?>;
+				out.textContent = <?php echo wp_json_encode( __( 'Testing…', 'amper-live-assisted-sales' ) ); ?>;
 				var body = new URLSearchParams();
 				body.set("action", "amper_las_test_connection");
 				body.set("_wpnonce", <?php echo wp_json_encode( wp_create_nonce( 'amper_las_test' ) ); ?>);
@@ -242,7 +264,7 @@ class ALAS_Settings {
 						out.style.color = data && data.success ? "#00a32a" : "#d63638";
 						if (data && data.success) { window.setTimeout(function () { window.location.reload(); }, 900); }
 					})
-					.catch(function () { out.textContent = <?php echo wp_json_encode( __( 'Request failed.', 'amper-las' ) ); ?>; out.style.color = "#d63638"; });
+					.catch(function () { out.textContent = <?php echo wp_json_encode( __( 'Request failed.', 'amper-live-assisted-sales' ) ); ?>; out.style.color = "#d63638"; });
 			});
 		})();
 		</script>
@@ -253,7 +275,7 @@ class ALAS_Settings {
 
 	public static function ajax_test_connection() {
 		if ( ! current_user_can( 'manage_woocommerce' ) || ! check_ajax_referer( 'amper_las_test', '_wpnonce', false ) ) {
-			wp_send_json_error( array( 'message' => __( 'Not allowed.', 'amper-las' ) ), 403 );
+			wp_send_json_error( array( 'message' => __( 'Not allowed.', 'amper-live-assisted-sales' ) ), 403 );
 		}
 		$result = self::run_connection_test();
 		if ( $result['ok'] ) {
@@ -271,8 +293,8 @@ class ALAS_Settings {
 		if ( ! self::base_url() || ! self::api_key() ) {
 			update_option( self::OPTION_SITE_PUBLIC_KEY, '', false );
 			$message = ! self::base_url()
-				? __( 'The AMPER LAS platform address is not set.', 'amper-las' )
-				: __( 'A store API key is required. Paste the key from your store\'s page in the AMPER LAS console.', 'amper-las' );
+				? __( 'The AMPER LAS platform address is not set.', 'amper-live-assisted-sales' )
+				: __( 'A store API key is required. Paste the key from your store\'s page in the AMPER LAS console.', 'amper-live-assisted-sales' );
 			self::record_test_result( 'failed', $message );
 			return array( 'ok' => false, 'message' => $message );
 		}
@@ -282,12 +304,12 @@ class ALAS_Settings {
 		if ( is_wp_error( $response ) ) {
 			$reason = strtolower( $response->get_error_message() );
 			if ( strpos( $reason, 'could not resolve' ) !== false || strpos( $reason, 'name or service' ) !== false || strpos( $reason, 'getaddrinfo' ) !== false ) {
-				$message = __( 'We couldn\'t find that server. Check the AMPER LAS platform address - it is the AMPER platform address, not your store\'s own website.', 'amper-las' );
+				$message = __( 'We couldn\'t find that server. Check the AMPER LAS platform address - it is the AMPER platform address, not your store\'s own website.', 'amper-live-assisted-sales' );
 			} elseif ( strpos( $reason, 'refused' ) !== false || strpos( $reason, 'connection reset' ) !== false ) {
-				$message = __( 'The AMPER LAS server address was reached but refused the connection. Confirm the address and port are correct and that the LAS platform is running.', 'amper-las' );
+				$message = __( 'The AMPER LAS server address was reached but refused the connection. Confirm the address and port are correct and that the LAS platform is running.', 'amper-live-assisted-sales' );
 			} else {
 				/* translators: %s: error detail. */
-				$message = sprintf( __( 'LAS connection failed: %s', 'amper-las' ), $response->get_error_message() );
+				$message = sprintf( __( 'LAS connection failed: %s', 'amper-live-assisted-sales' ), $response->get_error_message() );
 			}
 			self::record_test_result( 'failed', $message );
 			return array( 'ok' => false, 'message' => $message );
@@ -299,10 +321,10 @@ class ALAS_Settings {
 		if ( $code >= 400 ) {
 			$detail = is_array( $data ) ? (string) ( $data['detail'] ?? '' ) : '';
 			if ( $detail === 'Invalid store API key.' ) {
-				$detail = __( 'Invalid store API key.', 'amper-las' );
+				$detail = __( 'Invalid store API key.', 'amper-live-assisted-sales' );
 			}
 			/* translators: %d: HTTP status code. */
-			$message = sprintf( __( 'LAS rejected the API key (HTTP %d).', 'amper-las' ), $code );
+			$message = sprintf( __( 'LAS rejected the API key (HTTP %d).', 'amper-live-assisted-sales' ), $code );
 			if ( $detail ) {
 				$message .= ' ' . $detail;
 			}
@@ -318,7 +340,7 @@ class ALAS_Settings {
 		$public_key = trim( (string) ( $store['public_key'] ?? '' ) );
 		update_option( self::OPTION_SITE_PUBLIC_KEY, $public_key, false );
 		/* translators: %s: store name. */
-		$message = sprintf( __( 'Connection to %s works correctly.', 'amper-las' ), $store_name ? $store_name : __( 'your store', 'amper-las' ) );
+		$message = sprintf( __( 'Connection to %s works correctly.', 'amper-live-assisted-sales' ), $store_name ? $store_name : __( 'your store', 'amper-live-assisted-sales' ) );
 		self::record_test_result( 'success', $message );
 		return array( 'ok' => true, 'message' => $message );
 	}

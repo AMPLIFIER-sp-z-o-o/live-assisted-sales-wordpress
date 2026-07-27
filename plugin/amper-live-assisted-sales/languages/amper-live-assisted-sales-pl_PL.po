@@ -1,0 +1,198 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: AMPER Live Assisted Sales 1.0.0\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: pl_PL\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Domain: amper-live-assisted-sales\n"
+
+msgid "AMPER Live Assisted Sales requires WooCommerce to be installed and active."
+msgstr "Wtyczka AMPER Live Assisted Sales wymaga zainstalowanego i aktywnego WooCommerce."
+
+msgid "Live Assisted Sales"
+msgstr "Live Assisted Sales"
+
+msgid "AMPER Live Assisted Sales"
+msgstr "AMPER Live Assisted Sales"
+
+msgid "Connect your store to the AMPER Live Assisted Sales console: live visitor activity, purchase-intent scoring and a chat widget with AI assistance."
+msgstr "Połącz swój sklep z konsolą AMPER Live Assisted Sales: aktywność klientów na żywo, ocena intencji zakupowej i widget czatu ze wsparciem AI."
+
+msgid "Integration enabled"
+msgstr "Integracja włączona"
+
+msgid "Send events to Live Assisted Sales and show the chat widget"
+msgstr "Wysyłaj zdarzenia do Live Assisted Sales i pokazuj widget czatu"
+
+msgid "LAS platform address"
+msgstr "Adres platformy LAS"
+
+msgid "The AMPER Live Assisted Sales platform address, e.g. https://live-assisted-sales.com."
+msgstr "Adres platformy AMPER Live Assisted Sales, np. https://live-assisted-sales.com."
+
+msgid "Public widget address (advanced)"
+msgstr "Publiczny adres widgetu (zaawansowane)"
+
+msgid "Only needed when your server reaches LAS through a different address than your visitors' browsers (e.g. Docker or an internal network). Leave empty to use the platform address above."
+msgstr "Potrzebne tylko wtedy, gdy Twój serwer łączy się z LAS pod innym adresem niż przeglądarki klientów (np. Docker lub sieć wewnętrzna). Zostaw puste, aby użyć adresu platformy powyżej."
+
+msgid "Store API key"
+msgstr "Klucz API sklepu"
+
+msgid "Paste the key from your store's page in the AMPER LAS console."
+msgstr "Wklej klucz ze strony Twojego sklepu w konsoli AMPER LAS."
+
+msgid "Chat widget accent color"
+msgstr "Kolor przewodni widgetu czatu"
+
+msgid "Optional. A CSS color (e.g. #2563eb) for the chat bubble; leave empty for the default."
+msgstr "Opcjonalne. Kolor CSS (np. #2563eb) dla dymka czatu; zostaw puste, aby użyć domyślnego."
+
+msgid "Chat widget logo URL"
+msgstr "Adres URL logo widgetu czatu"
+
+msgid "Optional. Leave empty to use your theme's logo."
+msgstr "Opcjonalne. Zostaw puste, aby użyć logo motywu."
+
+msgid "Connection status"
+msgstr "Stan połączenia"
+
+msgid "Connected - the chat widget is active on your store."
+msgstr "Połączono - widget czatu jest aktywny w Twoim sklepie."
+
+msgid "Not connected yet - save your settings, then run the connection test."
+msgstr "Jeszcze nie połączono - zapisz ustawienia, a następnie uruchom test połączenia."
+
+msgid "Test connection"
+msgstr "Testuj połączenie"
+
+msgid "%d event is waiting to be delivered to LAS."
+msgid_plural "%d events are waiting to be delivered to LAS."
+msgstr[0] "%d zdarzenie czeka na dostarczenie do LAS."
+msgstr[1] "%d zdarzenia czekają na dostarczenie do LAS."
+msgstr[2] "%d zdarzeń czeka na dostarczenie do LAS."
+
+msgid "Testing…"
+msgstr "Testowanie…"
+
+msgid "Request failed."
+msgstr "Żądanie nie powiodło się."
+
+msgid "Not allowed."
+msgstr "Brak uprawnień."
+
+msgid "The AMPER LAS platform address is not set."
+msgstr "Adres platformy AMPER LAS nie został ustawiony."
+
+msgid "A store API key is required. Paste the key from your store's page in the AMPER LAS console."
+msgstr "Wymagany jest klucz API sklepu. Wklej klucz ze strony Twojego sklepu w konsoli AMPER LAS."
+
+msgid "We couldn't find that server. Check the AMPER LAS platform address - it is the AMPER platform address, not your store's own website."
+msgstr "Nie udało się znaleźć tego serwera. Sprawdź adres platformy AMPER LAS - to adres platformy AMPER, a nie Twojego sklepu."
+
+msgid "The AMPER LAS server address was reached but refused the connection. Confirm the address and port are correct and that the LAS platform is running."
+msgstr "Serwer AMPER LAS odpowiedział, ale odrzucił połączenie. Upewnij się, że adres i port są poprawne oraz że platforma LAS działa."
+
+msgid "LAS connection failed: %s"
+msgstr "Połączenie z LAS nie powiodło się: %s"
+
+msgid "Invalid store API key."
+msgstr "Nieprawidłowy klucz API sklepu."
+
+msgid "LAS rejected the API key (HTTP %d)."
+msgstr "LAS odrzucił klucz API (HTTP %d)."
+
+msgid "Connection to %s works correctly."
+msgstr "Połączenie ze sklepem %s działa poprawnie."
+
+msgid "your store"
+msgstr "Twój sklep"
+
+msgid "Every minute (AMPER LAS outbox relay)"
+msgstr "Co minutę (kolejka zdarzeń AMPER LAS)"
+
+msgid "Added to cart:"
+msgstr "Dodano do koszyka:"
+
+msgid "Updates"
+msgstr "Aktualizacje"
+
+msgid "Version %s. The plugin keeps itself up to date - there is nothing to click."
+msgstr "Wersja %s. Wtyczka aktualizuje się sama - nie musisz nic klikać."
+
+msgid "Check for updates every few minutes (test stores only)"
+msgstr "Sprawdzaj aktualizacje co kilka minut (tylko sklepy testowe)"
+
+msgid "Off by default: updates are picked up within about half a day, the same rhythm WordPress uses for every other plugin. Turn this on only on a staging or demo store, where you want a change to arrive right after it is published."
+msgstr "Domyślnie wyłączone: aktualizacje docierają w ciągu mniej więcej pół dnia, czyli w tym samym rytmie, w jakim WordPress sprawdza pozostałe wtyczki. Włącz to tylko na sklepie testowym lub demonstracyjnym, gdzie zmiana ma być widoczna zaraz po opublikowaniu."
+
+msgid "AMPER LAS update check"
+msgstr "Sprawdzanie aktualizacji AMPER LAS"
+
+msgid "Could not prepare the update package."
+msgstr "Nie udało się przygotować paczki z aktualizacją."
+
+msgid "Settings"
+msgstr "Ustawienia"
+
+msgid "AMPER Live Assisted Sales is not connected yet."
+msgstr "AMPER Live Assisted Sales nie jest jeszcze połączony."
+
+msgid "Connect your store to start seeing live visitor activity and to show the chat widget."
+msgstr "Połącz sklep, żeby widzieć aktywność klientów na żywo i pokazać widget czatu."
+
+msgid "Finish setup"
+msgstr "Dokończ konfigurację"
+
+msgid "Connect your store"
+msgstr "Połącz swój sklep"
+
+msgid "One click. You will sign in at live-assisted-sales.com (or create a free account), confirm this store, and come straight back - the key is saved for you."
+msgstr "Jedno kliknięcie. Zalogujesz się na live-assisted-sales.com (albo założysz darmowe konto), potwierdzisz ten sklep i wrócisz tutaj - klucz zapiszemy za Ciebie."
+
+msgid "Connect to AMPER LAS"
+msgstr "Połącz z AMPER LAS"
+
+msgid "No account yet? You create one on the way - the first 7 days are free."
+msgstr "Nie masz jeszcze konta? Założysz je po drodze - pierwsze 7 dni bez opłat."
+
+msgid "Prefer to do it by hand? Paste your store API key below and run the connection test."
+msgstr "Wolisz ręcznie? Wklej niżej klucz API sklepu i uruchom test połączenia."
+
+msgid "Open the console"
+msgstr "Otwórz konsolę"
+
+msgid "You are not allowed to connect this store."
+msgstr "Nie masz uprawnień, żeby połączyć ten sklep."
+
+msgid "Set the LAS platform address first."
+msgstr "Najpierw ustaw adres platformy LAS."
+
+msgid "The connection attempt expired. Please try again."
+msgstr "Próba połączenia wygasła. Spróbuj jeszcze raz."
+
+msgid "The connection response did not match this store. Nothing was changed."
+msgstr "Odpowiedź nie pasowała do tego sklepu. Nic nie zostało zmienione."
+
+msgid "Connection cancelled - nothing was changed."
+msgstr "Połączenie anulowane - nic nie zostało zmienione."
+
+msgid "AMPER LAS did not return a connection code. Nothing was changed."
+msgstr "AMPER LAS nie odesłał kodu połączenia. Nic nie zostało zmienione."
+
+msgid "Could not reach AMPER LAS: %s"
+msgstr "Nie udało się połączyć z AMPER LAS: %s"
+
+msgid "AMPER LAS refused the connection: %s"
+msgstr "AMPER LAS odrzucił połączenie: %s"
+
+msgid "The key was saved but the connection test failed: %s"
+msgstr "Klucz został zapisany, ale test połączenia się nie powiódł: %s"
+
+msgid "Connected to AMPER LAS as \"%s\". The chat widget is live on your storefront."
+msgstr "Połączono z AMPER LAS jako „%s”. Widget czatu działa już w Twoim sklepie."
+
+msgid "Connected to AMPER LAS. The chat widget is live on your storefront."
+msgstr "Połączono z AMPER LAS. Widget czatu działa już w Twoim sklepie."

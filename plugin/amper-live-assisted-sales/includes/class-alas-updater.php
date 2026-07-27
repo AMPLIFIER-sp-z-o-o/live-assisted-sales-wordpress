@@ -125,7 +125,7 @@ class ALAS_Updater {
 	public static function register_interval( $schedules ) {
 		$schedules[ self::CRON_INTERVAL ] = array(
 			'interval' => self::check_interval(),
-			'display'  => __( 'AMPER LAS update check', 'amper-las' ),
+			'display'  => __( 'AMPER LAS update check', 'amper-live-assisted-sales' ),
 		);
 		return $schedules;
 	}
@@ -332,7 +332,7 @@ class ALAS_Updater {
 			'homepage'      => 'https://live-assisted-sales.com/',
 			'download_link' => self::package_url(),
 			'sections'      => array(
-				'description' => __( 'Connects your WooCommerce store to the AMPER Live Assisted Sales platform. Updates are delivered straight from the plugin\'s repository.', 'amper-las' ),
+				'description' => __( 'Connects your WooCommerce store to the AMPER Live Assisted Sales platform. Updates are delivered straight from the plugin\'s repository.', 'amper-live-assisted-sales' ),
 			),
 		);
 	}
@@ -362,7 +362,7 @@ class ALAS_Updater {
 			$wp_filesystem->delete( $target, true );
 		}
 		if ( ! $wp_filesystem->move( $candidate, $target ) ) {
-			return new WP_Error( 'amper_las_source_move_failed', __( 'Could not prepare the update package.', 'amper-las' ) );
+			return new WP_Error( 'amper_las_source_move_failed', __( 'Could not prepare the update package.', 'amper-live-assisted-sales' ) );
 		}
 		return trailingslashit( $target );
 	}

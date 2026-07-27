@@ -17,7 +17,7 @@ buy-from-chat.
 - `build-zip.ps1` / `build-zip.sh` - build `dist/*.zip` for Plugins -> Add New -> Upload (CI: Jenkins).
 - `dev/docker-compose.yml` - MariaDB + WordPress (port **8003**) + wp-cli, with the plugin bind-mounted.
 - `dev/provision.sh` - idempotent store setup (WooCommerce + Storefront + sample catalog + PLN/pl_PL + shipping/payments/customer/coupon + plugin config + LAS connection test).
-- `dev/tests/` - backend test suites (78 wp-cli unit tests, 28 updater checks, 12 REST edge cases, 20 LAS-parity checks).
+- `dev/tests/` - backend test suites (78 wp-cli unit tests, 28 updater checks, 11 connect-handshake checks, 12 REST edge cases, 20 LAS-parity checks).
 - `deploy/` - production deployment (nginx-proxy + Let's Encrypt): `DEVOPS-HANDOFF.md` is the step-by-step runbook.
 
 ## Local test environment
@@ -92,6 +92,26 @@ Updates cannot be rolled back from here - a bad version is fixed by shipping the
 gate above is the last chance to catch it. WordPress does protect itself: core refuses an update
 whose `Requires PHP` / `Requires at least` / `Requires Plugins` the store fails (the updater passes
 all three through), and restores the previous version if the new one fatals on activation.
+
+## Connecting a store
+
+`Connect to AMPER LAS` on the settings page runs an OAuth-style PKCE handshake, so a merchant never
+copies a key between two tabs:
+
+1. The plugin sends the merchant to `{LAS}/integrations/wordpress/connect/` with a `state`, a
+   `challenge` = base64url(sha256(verifier)), the store URL and a return URL.
+2. They sign in (or sign up) on LAS and confirm. LAS registers the store and redirects back with
+   `state` and a single-use `code`.
+3. The plugin checks `state`, then trades the `code` plus the `verifier` for the write key over a
+   direct server-to-server POST to `{LAS}/api/integrations/wordpress/exchange/`.
+
+The write key never travels through the browser - only the code does, and a code is worthless
+without the verifier, which never leaves the store's server. LAS refuses a return URL on a different
+host than the store being connected, so a code cannot be redirected to a third party, and it burns a
+code on the first attempt whether or not that attempt succeeded.
+
+Reconnecting a store you already own hands the same key back rather than creating a second row;
+a domain registered under someone else's account is refused outright.
 
 ## Public demo store (production)
 

@@ -9,7 +9,7 @@
  * Author URI: https://live-assisted-sales.com/
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain: amper-las
+ * Text Domain: amper-live-assisted-sales
  * Domain Path: /languages
  * Requires at least: 6.2
  * Requires PHP: 8.0
@@ -28,6 +28,8 @@ define( 'AMPER_LAS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AMPER_LAS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-settings.php';
+require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-onboarding.php';
+require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-connect.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-client.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-consent.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-payloads.php';
@@ -47,7 +49,7 @@ add_action( 'before_woocommerce_init', function () {
 } );
 
 add_action( 'plugins_loaded', function () {
-	load_plugin_textdomain( 'amper-las', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+	load_plugin_textdomain( 'amper-live-assisted-sales', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
 
 	// Before the WooCommerce check on purpose: a store that switched WooCommerce off must still
 	// receive plugin updates instead of being frozen on whatever version it had that day.
@@ -56,13 +58,15 @@ add_action( 'plugins_loaded', function () {
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		add_action( 'admin_notices', function () {
 			echo '<div class="notice notice-error"><p>'
-				. esc_html__( 'AMPER Live Assisted Sales requires WooCommerce to be installed and active.', 'amper-las' )
+				. esc_html__( 'AMPER Live Assisted Sales requires WooCommerce to be installed and active.', 'amper-live-assisted-sales' )
 				. '</p></div>';
 		} );
 		return;
 	}
 
 	ALAS_Settings::init();
+	ALAS_Onboarding::init();
+	ALAS_Connect::init();
 	ALAS_Outbox::init();
 	ALAS_Tracking::init();
 	ALAS_Rest::init();
@@ -72,6 +76,7 @@ add_action( 'plugins_loaded', function () {
 register_activation_hook( __FILE__, function () {
 	ALAS_Outbox::install();
 	ALAS_Outbox::schedule_cron();
+	ALAS_Onboarding::on_activate();
 } );
 
 register_deactivation_hook( __FILE__, function () {

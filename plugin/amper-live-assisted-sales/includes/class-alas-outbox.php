@@ -54,7 +54,7 @@ class ALAS_Outbox {
 	public static function register_cron_interval( $schedules ) {
 		$schedules[ self::CRON_INTERVAL ] = array(
 			'interval' => 60,
-			'display'  => __( 'Every minute (AMPER LAS outbox relay)', 'amper-las' ),
+			'display'  => __( 'Every minute (AMPER LAS outbox relay)', 'amper-live-assisted-sales' ),
 		);
 		return $schedules;
 	}
