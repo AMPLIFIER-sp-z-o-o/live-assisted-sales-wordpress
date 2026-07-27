@@ -17,7 +17,7 @@ buy-from-chat.
 - `build-zip.ps1` / `build-zip.sh` - build `dist/*.zip` for Plugins -> Add New -> Upload (CI: Jenkins).
 - `dev/docker-compose.yml` - MariaDB + WordPress (port **8003**) + wp-cli, with the plugin bind-mounted.
 - `dev/provision.sh` - idempotent store setup (WooCommerce + Storefront + sample catalog + PLN/pl_PL + shipping/payments/customer/coupon + plugin config + LAS connection test).
-- `dev/tests/` - backend test suites (78 wp-cli unit tests, 22 updater checks, 12 REST edge cases, 20 LAS-parity checks).
+- `dev/tests/` - backend test suites (78 wp-cli unit tests, 28 updater checks, 12 REST edge cases, 20 LAS-parity checks).
 - `deploy/` - production deployment (nginx-proxy + Let's Encrypt): `DEVOPS-HANDOFF.md` is the step-by-step runbook.
 
 ## Local test environment
@@ -48,8 +48,12 @@ Pushing without touching that header changes nothing on any store; bumping it ha
 every install. Updates install **unattended** - a store that wants the button back adds
 `add_filter( 'amper_las_auto_update', '__return_false' );`.
 
-Stores check for a new version every **12 hours**, the same cadence WordPress core uses for
-wordpress.org plugins. WooCommerce -> Live Assisted Sales has a **"Check for updates every few
+Stores check for a new version on exactly the ladder core uses for wordpress.org plugins
+(`wp-includes/update.php`): **1 minute** on Dashboard -> Updates, **1 hour** on the Plugins screen,
+**2 hours** under cron, **12 hours** otherwise. So 12 hours is the idle worst case, not the wait an
+admin sitting in wp-admin sees, and "Check again" on the Updates screen is immediate. Storefront
+requests never fetch - a shopper's page load may not block on GitHub - so the check happens on the
+next admin page load or cron tick. WooCommerce -> Live Assisted Sales has a **"Check for updates every few
 minutes"** box for staging and demo stores, which drops that to two minutes; leave it off on real
 shops. Either way WP-Cron has no daemon - it rides on page loads - so a shop with no visitors
 updates when its next visitor arrives.
@@ -80,7 +84,7 @@ curl -s -o /dev/null -w '%{http_code}' http://localhost:8003/   # 500 means fata
 docker compose -f dev/docker-compose.yml run --rm -v "$PWD/dev/tests:/tests:ro" wpcli \
   wp --path=/var/www/html eval-file /tests/test-plugin.php     # 78 unit tests
 docker compose -f dev/docker-compose.yml run --rm -v "$PWD/dev/tests:/tests:ro" wpcli \
-  wp --path=/var/www/html eval-file /tests/test-updater.php    # 22 updater checks (hits GitHub)
+  wp --path=/var/www/html eval-file /tests/test-updater.php    # 28 updater checks (hits GitHub)
 sh dev/tests/test-rest.sh                                      # 12 REST edge cases
 ```
 

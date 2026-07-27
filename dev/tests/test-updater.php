@@ -12,6 +12,34 @@ add_filter('amper_las_update_check_interval', function () { return 5; });
 ck(ALAS_Updater::check_interval() === MINUTE_IN_SECONDS, 'filter is floored at 60s', ALAS_Updater::check_interval());
 remove_all_filters('amper_las_update_check_interval');
 
+echo "== cache ladder (mirrors core wp_update_plugins) ==\n";
+$ttl = function () { $m = new ReflectionMethod('ALAS_Updater', 'cache_ttl'); $m->setAccessible(true); return $m->invoke(null); };
+update_option('amper_las_fast_updates', '');
+ck($ttl() === 12 * HOUR_IN_SECONDS, 'idle request caches for 12h', $ttl());
+do_action('load-plugins.php');
+ck($ttl() === HOUR_IN_SECONDS, 'Plugins screen drops it to 1h, like core', $ttl());
+do_action('load-update-core.php');
+ck($ttl() === MINUTE_IN_SECONDS, 'Updates screen drops it to 1 min, like core', $ttl());
+update_option('amper_las_fast_updates', 'yes');
+ck($ttl() === MINUTE_IN_SECONDS, 'fast mode never loosens the ladder', $ttl());
+update_option('amper_las_fast_updates', '');
+
+echo "== storefront never blocks on GitHub ==\n";
+$may = new ReflectionMethod('ALAS_Updater', 'may_fetch');
+$may->setAccessible(true);
+ck($may->invoke(null) === true, 'admin / cron / wp-cli may fetch');
+// Black box: with the cache empty, a storefront request must NOT populate it - a shopper's page
+// load may never wait on GitHub. Asserted against the running store, not simulated.
+ALAS_Updater::flush_cache();
+// redirection => 0: the container reaches the store as http://wordpress/, which WordPress answers
+// with its canonical redirect to the public host. A 301 still means PHP ran, so the guard was
+// exercised - which is the whole point of the probe.
+$r = wp_remote_get('http://wordpress/?amper_las_guard_probe=1', array('timeout' => 20, 'redirection' => 0));
+$after = get_site_transient('amper_las_remote_version');
+$code = is_wp_error($r) ? $r->get_error_message() : (int) wp_remote_retrieve_response_code($r);
+ck(in_array($code, array(200, 301), true), 'storefront request executed PHP', $code);
+ck($after === false, 'storefront request left the version cache untouched', var_export($after, true));
+
 echo "== remote headers (live GitHub API) ==\n";
 ALAS_Updater::flush_cache();
 $h = ALAS_Updater::remote_headers(true);

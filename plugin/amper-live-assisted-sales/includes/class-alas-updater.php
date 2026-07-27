@@ -88,6 +88,40 @@ class ALAS_Updater {
 		return get_option( 'amper_las_fast_updates', '' ) === 'yes';
 	}
 
+	/**
+	 * How long a fetched version stays good.
+	 *
+	 * Mirrors core's own ladder for update checks (wp-includes/update.php: 60s on the Updates screen,
+	 * 1h on the Plugins screen, 2h under cron, 12h otherwise). Without this the plugin would be
+	 * strictly worse than any wordpress.org one: core would refresh its transient after an hour
+	 * because an admin opened the Plugins screen, our filter would run inside that refresh, and a
+	 * flat 12-hour cache would answer it with a stale version anyway. The cadence a shop owner
+	 * actually experiences is this ladder; self::check_interval() only bounds it from above.
+	 */
+	private static function cache_ttl() {
+		if ( did_action( 'load-update-core.php' ) ) {
+			$ttl = MINUTE_IN_SECONDS;
+		} elseif ( did_action( 'load-plugins.php' ) || did_action( 'load-update.php' ) ) {
+			$ttl = HOUR_IN_SECONDS;
+		} elseif ( wp_doing_cron() ) {
+			$ttl = 2 * HOUR_IN_SECONDS;
+		} else {
+			$ttl = self::DEFAULT_CHECK_INTERVAL;
+		}
+		return min( self::check_interval(), $ttl );
+	}
+
+	/**
+	 * Whether this request is allowed to spend time talking to GitHub.
+	 *
+	 * The read filter runs on every read of the update transient, including on the storefront. A
+	 * shopper's page load must never block on our HTTP call, so outside the admin and cron we answer
+	 * from cache or not at all - the check will happen on the next admin page load or cron tick.
+	 */
+	private static function may_fetch() {
+		return is_admin() || wp_doing_cron() || ( defined( 'WP_CLI' ) && WP_CLI );
+	}
+
 	public static function register_interval( $schedules ) {
 		$schedules[ self::CRON_INTERVAL ] = array(
 			'interval' => self::check_interval(),
@@ -202,6 +236,9 @@ class ALAS_Updater {
 			if ( is_array( $cached ) ) {
 				return array_merge( $empty, $cached );
 			}
+			if ( ! self::may_fetch() ) {
+				return $empty;
+			}
 		}
 		$response = wp_remote_get(
 			self::remote_header_url(),
@@ -213,13 +250,13 @@ class ALAS_Updater {
 		);
 		if ( is_wp_error( $response ) || (int) wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			// Cache the miss briefly too, so an outage doesn't turn every admin page into a retry.
-			set_site_transient( self::VERSION_CACHE_KEY, $empty, max( self::check_interval(), 5 * MINUTE_IN_SECONDS ) );
+			set_site_transient( self::VERSION_CACHE_KEY, $empty, max( self::cache_ttl(), 5 * MINUTE_IN_SECONDS ) );
 			return $empty;
 		}
 		$payload = json_decode( (string) wp_remote_retrieve_body( $response ), true );
 		$body    = isset( $payload['content'] ) ? (string) base64_decode( (string) $payload['content'] ) : '';
 		if ( '' === $body ) {
-			set_site_transient( self::VERSION_CACHE_KEY, $empty, max( self::check_interval(), 5 * MINUTE_IN_SECONDS ) );
+			set_site_transient( self::VERSION_CACHE_KEY, $empty, max( self::cache_ttl(), 5 * MINUTE_IN_SECONDS ) );
 			return $empty;
 		}
 		$header = static function ( $label ) use ( $body ) {
@@ -231,7 +268,7 @@ class ALAS_Updater {
 			'requires_php'     => $header( 'Requires PHP' ),
 			'requires_plugins' => $header( 'Requires Plugins' ),
 		);
-		set_site_transient( self::VERSION_CACHE_KEY, $headers, self::check_interval() );
+		set_site_transient( self::VERSION_CACHE_KEY, $headers, self::cache_ttl() );
 		return $headers;
 	}
 
