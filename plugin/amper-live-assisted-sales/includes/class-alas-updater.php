@@ -28,20 +28,25 @@ class ALAS_Updater {
 	/** Directory inside the repo that actually holds the plugin. */
 	const PLUGIN_SUBDIR    = 'plugin/amper-live-assisted-sales';
 	const VERSION_CACHE_KEY = 'amper_las_remote_version';
-	/** GitHub allows 60 unauthenticated calls per hour per IP; WordPress checks for updates far more
-	 *  often than that across admin page loads, so the answer is cached for half a day. */
-	const CACHE_TTL        = 12 * HOUR_IN_SECONDS;
+	/** How long a version answer is reused. Short on purpose: this is the delay between pushing a
+	 *  fix and a shop having it. GitHub allows 60 unauthenticated calls an hour per IP and this
+	 *  costs at most 12 of them. */
+	const CACHE_TTL        = 5 * MINUTE_IN_SECONDS;
+	const CRON_INTERVAL    = 'amper_las_five_minutes';
 
 	const CRON_HOOK = 'amper_las_check_update';
 
 	public static function init() {
-		// WordPress looks for updates twice a day, so a fix pushed at noon could sit unseen until
-		// the evening. This integration is meant to run itself, so it checks hourly instead - the
-		// gap between "the fix exists" and "the shop has it" is the whole point of shipping this way.
+		// WordPress looks for updates twice a day, so a fix pushed at noon could sit unseen on a shop
+		// until the evening. That delay IS the product decision here, so it is cut to five minutes:
+		// a version bump should reach stores while you are still looking at the push.
+		//
+		// WP-Cron has no daemon - it rides on page loads - so on a shop with visitors this lands
+		// within minutes, and on a dead shop it lands with the first visitor. Nothing to install and
+		// nothing for the merchant to do either way.
+		add_filter( 'cron_schedules', array( __CLASS__, 'register_interval' ) ); // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected
 		add_action( self::CRON_HOOK, array( __CLASS__, 'check_and_update_now' ) );
-		if ( ! wp_next_scheduled( self::CRON_HOOK ) ) {
-			wp_schedule_event( time() + MINUTE_IN_SECONDS, 'hourly', self::CRON_HOOK );
-		}
+		self::ensure_scheduled();
 
 		// Both hooks on purpose: `pre_set_…` fires only when WordPress refreshes the transient
 		// (roughly twice a day), while `site_transient_…` also runs on every read - so the update
@@ -51,8 +56,29 @@ class ALAS_Updater {
 		add_filter( 'plugins_api', array( __CLASS__, 'plugin_details' ), 10, 3 );
 		add_filter( 'upgrader_source_selection', array( __CLASS__, 'rename_source_dir' ), 10, 4 );
 		add_filter( 'auto_update_plugin', array( __CLASS__, 'force_auto_update' ), 10, 2 );
-		// A fresh install/update should not wait up to 12h to learn about the next one.
+		// A fresh install/update should not wait for the next tick to learn about the one after it.
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'flush_cache' ) );
+	}
+
+	public static function register_interval( $schedules ) {
+		$schedules[ self::CRON_INTERVAL ] = array(
+			'interval' => 5 * MINUTE_IN_SECONDS,
+			'display'  => __( 'Every five minutes (AMPER LAS updates)', 'amper-las' ),
+		);
+		return $schedules;
+	}
+
+	/** Keeps the job on the current interval, including for stores upgrading from an older one. */
+	private static function ensure_scheduled() {
+		$next = wp_next_scheduled( self::CRON_HOOK );
+		if ( $next ) {
+			$event = wp_get_scheduled_event( self::CRON_HOOK );
+			if ( $event && self::CRON_INTERVAL === $event->schedule ) {
+				return;
+			}
+			wp_clear_scheduled_hook( self::CRON_HOOK );
+		}
+		wp_schedule_event( time() + MINUTE_IN_SECONDS, self::CRON_INTERVAL, self::CRON_HOOK );
 	}
 
 	public static function flush_cache() {
@@ -60,7 +86,7 @@ class ALAS_Updater {
 	}
 
 	/**
-	 * Hourly: look for a newer version and, if there is one, install it there and then.
+	 * Every few minutes: look for a newer version and, if there is one, install it there and then.
 	 *
 	 * Deliberately narrower than core's own unattended pass, which updates everything on the site
 	 * that has auto-updates on: this store's other plugins are not ours to hurry along. Only our
