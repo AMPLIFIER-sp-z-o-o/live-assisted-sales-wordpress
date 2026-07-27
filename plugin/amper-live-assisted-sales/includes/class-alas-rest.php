@@ -53,7 +53,11 @@ class ALAS_Rest {
 			if ( ! is_array( $session ) ) {
 				return array();
 			}
-			$rows = maybe_unserialize( $session['cart'] ?? '' );
+			// Never let a serialized payload instantiate objects: the cart row is written by
+			// WooCommerce, but this is the one place the plugin unserializes stored data, so it
+			// stays object-free by construction rather than by trusting the writer.
+			$raw  = (string) ( $session['cart'] ?? '' );
+			$rows = is_serialized( $raw ) ? unserialize( $raw, array( 'allowed_classes' => false ) ) : maybe_unserialize( $raw ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
 			if ( ! is_array( $rows ) || ! $rows ) {
 				return array();
 			}

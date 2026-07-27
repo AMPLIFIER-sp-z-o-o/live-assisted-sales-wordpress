@@ -2,8 +2,9 @@
 /**
  * Plugin Name: AMPER Live Assisted Sales
  * Plugin URI: https://live-assisted-sales.com/
+ * Update URI: https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress
  * Description: Connects your WooCommerce store to the AMPER Live Assisted Sales platform: real-time visitor tracking (GA4 event taxonomy), GDPR consent banner, live chat widget with buy-from-chat and AI assistance.
- * Version: 1.0.3
+ * Version: 1.0.4
  * Author: AMPER
  * Author URI: https://live-assisted-sales.com/
  * License: GPL v2 or later
@@ -21,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AMPER_LAS_VERSION', '1.0.3' );
+define( 'AMPER_LAS_VERSION', '1.0.4' );
 define( 'AMPER_LAS_PLUGIN_FILE', __FILE__ );
 define( 'AMPER_LAS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AMPER_LAS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
@@ -35,6 +36,7 @@ require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-dispatch.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-tracking.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-rest.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-frontend.php';
+require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-updater.php';
 
 // Declare compatibility with WooCommerce High-Performance Order Storage (custom order tables).
 add_action( 'before_woocommerce_init', function () {
@@ -46,6 +48,10 @@ add_action( 'before_woocommerce_init', function () {
 
 add_action( 'plugins_loaded', function () {
 	load_plugin_textdomain( 'amper-las', false, dirname( plugin_basename( __FILE__ ) ) . '/languages' );
+
+	// Before the WooCommerce check on purpose: a store that switched WooCommerce off must still
+	// receive plugin updates instead of being frozen on whatever version it had that day.
+	ALAS_Updater::init();
 
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		add_action( 'admin_notices', function () {

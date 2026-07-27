@@ -53,18 +53,55 @@ class ALAS_Payloads {
 
 	/**
 	 * Real shopper IP. Events are forwarded server-to-server, so LAS only sees this
-	 * server's IP - the visitor's address must ride in the payload. Honours
-	 * X-Forwarded-For (first hop) when behind a proxy, else REMOTE_ADDR.
+	 * server's IP - the visitor's address must ride in the payload.
+	 *
+	 * X-Forwarded-For is a CLIENT-SUPPLIED header: taken at face value, any shopper can hand the
+	 * merchant a made-up address that the console then shows as fact, country flag and all. There is
+	 * no way to detect from inside PHP whether something in front actually rewrites the header -
+	 * a request arriving from a private address only means "something is in front", not "that
+	 * something appends X-Forwarded-For" (a plain Docker or LAN setup satisfies the first and not
+	 * the second, and the spoof sails through). So the chain is ignored unless the site says
+	 * otherwise, and REMOTE_ADDR - which cannot be forged - is used instead:
+	 *
+	 *     add_filter( 'amper_las_trust_forwarded_for', '__return_true' );
+	 *
+	 * Behind Cloudflare or an nginx that sets `$proxy_add_x_forwarded_for`, turn it on: the header
+	 * then carries the real address and we read the RIGHTMOST public entry, the hop that proxy
+	 * appended, because everything to its left is whatever the client typed.
 	 */
 	public static function client_ip() {
+		$remote    = (string) ( $_SERVER['REMOTE_ADDR'] ?? '' );
 		$forwarded = (string) ( $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '' );
-		if ( $forwarded ) {
-			$first = trim( explode( ',', $forwarded )[0] );
-			if ( $first ) {
-				return $first;
+		if ( ! $forwarded ) {
+			return $remote;
+		}
+		/**
+		 * Whether a proxy/CDN in front of this site rewrites X-Forwarded-For and it may be trusted.
+		 * Off by default: a forged customer IP shown to the merchant as fact is worse than showing
+		 * the proxy's own address.
+		 *
+		 * @param bool   $trusted Whether the forwarded chain may be trusted.
+		 * @param string $remote  REMOTE_ADDR for this request.
+		 */
+		$trusted = (bool) apply_filters( 'amper_las_trust_forwarded_for', false, $remote );
+		if ( ! $trusted ) {
+			return $remote;
+		}
+		$hops = array_reverse( array_map( 'trim', explode( ',', $forwarded ) ) );
+		foreach ( $hops as $hop ) {
+			if ( $hop && filter_var( $hop, FILTER_VALIDATE_IP ) && ! self::is_private_ip( $hop ) ) {
+				return $hop;
 			}
 		}
-		return (string) ( $_SERVER['REMOTE_ADDR'] ?? '' );
+		return $remote;
+	}
+
+	/** Loopback / RFC1918 / link-local / unique-local address - i.e. our own infrastructure. */
+	private static function is_private_ip( $ip ) {
+		if ( ! $ip || ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+			return false;
+		}
+		return ! filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
 	}
 
 	/**
@@ -170,13 +207,18 @@ class ALAS_Payloads {
 		);
 	}
 
+	/**
+	 * The absolute URL of the page being tracked.
+	 *
+	 * Built from home_url(), never from the Host header: HTTP_HOST is client-supplied, so a
+	 * spoofed Host used to put an attacker-chosen absolute URL into the merchant's event history,
+	 * where it reads like a link to their own shop. Only the path/query comes from the request.
+	 */
 	public static function current_url() {
-		$host = (string) ( $_SERVER['HTTP_HOST'] ?? '' );
 		$uri  = (string) ( $_SERVER['REQUEST_URI'] ?? '/' );
-		if ( ! $host ) {
-			return home_url( '/' );
-		}
-		return ( is_ssl() ? 'https://' : 'http://' ) . $host . $uri;
+		$path = '/' . ltrim( wp_parse_url( $uri, PHP_URL_PATH ) ?? '/', '/' );
+		$query = (string) ( wp_parse_url( $uri, PHP_URL_QUERY ) ?? '' );
+		return home_url( $path . ( $query ? '?' . $query : '' ) );
 	}
 
 	/**
