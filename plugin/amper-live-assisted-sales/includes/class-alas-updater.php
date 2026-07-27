@@ -28,11 +28,11 @@ class ALAS_Updater {
 	/** Directory inside the repo that actually holds the plugin. */
 	const PLUGIN_SUBDIR    = 'plugin/amper-live-assisted-sales';
 	const VERSION_CACHE_KEY = 'amper_las_remote_version';
-	/** How long a version answer is reused. Short on purpose: this is the delay between pushing a
-	 *  fix and a shop having it. GitHub allows 60 unauthenticated calls an hour per IP and this
-	 *  costs at most 12 of them. */
-	const CACHE_TTL        = 5 * MINUTE_IN_SECONDS;
-	const CRON_INTERVAL    = 'amper_las_five_minutes';
+	/** Seconds between checks - and therefore the delay between pushing a fix and a shop running it.
+	 *  Two minutes costs GitHub 30 requests an hour per store, half of what an unauthenticated
+	 *  caller is allowed. Override with the `amper_las_update_check_interval` filter. */
+	const DEFAULT_CHECK_INTERVAL = 2 * MINUTE_IN_SECONDS;
+	const CRON_INTERVAL          = 'amper_las_update_interval';
 
 	const CRON_HOOK = 'amper_las_check_update';
 
@@ -60,10 +60,22 @@ class ALAS_Updater {
 		add_action( 'upgrader_process_complete', array( __CLASS__, 'flush_cache' ) );
 	}
 
+	/**
+	 * How often to look for a new version.
+	 *
+	 * @param int $seconds Interval in seconds.
+	 */
+	public static function check_interval() {
+		$seconds = (int) apply_filters( 'amper_las_update_check_interval', self::DEFAULT_CHECK_INTERVAL );
+		// A floor of one minute keeps a mistyped filter from turning every page load into a fetch and
+		// burning through GitHub's hourly allowance.
+		return max( MINUTE_IN_SECONDS, $seconds );
+	}
+
 	public static function register_interval( $schedules ) {
 		$schedules[ self::CRON_INTERVAL ] = array(
-			'interval' => 5 * MINUTE_IN_SECONDS,
-			'display'  => __( 'Every five minutes (AMPER LAS updates)', 'amper-las' ),
+			'interval' => self::check_interval(),
+			'display'  => __( 'AMPER LAS update check', 'amper-las' ),
 		);
 		return $schedules;
 	}
@@ -78,7 +90,7 @@ class ALAS_Updater {
 			}
 			wp_clear_scheduled_hook( self::CRON_HOOK );
 		}
-		wp_schedule_event( time() + MINUTE_IN_SECONDS, self::CRON_INTERVAL, self::CRON_HOOK );
+		wp_schedule_event( time() + 30, self::CRON_INTERVAL, self::CRON_HOOK );
 	}
 
 	public static function flush_cache() {
@@ -86,7 +98,7 @@ class ALAS_Updater {
 	}
 
 	/**
-	 * Every few minutes: look for a newer version and, if there is one, install it there and then.
+	 * Every couple of minutes: look for a newer version and, if there is one, install it there and then.
 	 *
 	 * Deliberately narrower than core's own unattended pass, which updates everything on the site
 	 * that has auto-updates on: this store's other plugins are not ours to hurry along. Only our
@@ -126,13 +138,22 @@ class ALAS_Updater {
 		return dirname( self::basename() );
 	}
 
-	/** Raw URL of the plugin's main file on the tracked branch - the file carrying `Version:`. */
+	/**
+	 * Raw URL of the plugin's main file on the tracked branch - the file carrying `Version:`.
+	 *
+	 * The bucket parameter exists because raw.githubusercontent.com serves with `max-age=300`: without
+	 * it the CDN would keep answering with the previous version for up to five minutes, and that delay
+	 * would stack on top of ours. The value changes once per check interval, so repeated calls inside
+	 * one interval still ride the CDN instead of hammering it.
+	 */
 	private static function remote_header_url() {
+		$bucket = (int) floor( time() / self::check_interval() );
 		return sprintf(
-			'https://raw.githubusercontent.com/%s/%s/%s/amper-live-assisted-sales.php',
+			'https://raw.githubusercontent.com/%s/%s/%s/amper-live-assisted-sales.php?bucket=%d',
 			self::REPO,
 			self::BRANCH,
-			self::PLUGIN_SUBDIR
+			self::PLUGIN_SUBDIR,
+			$bucket
 		);
 	}
 
@@ -164,7 +185,7 @@ class ALAS_Updater {
 		$response = wp_remote_get( self::remote_header_url(), array( 'timeout' => 8 ) );
 		if ( is_wp_error( $response ) || (int) wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			// Cache the miss briefly too, so an outage doesn't turn every admin page into a retry.
-			set_site_transient( self::VERSION_CACHE_KEY, $empty, 15 * MINUTE_IN_SECONDS );
+			set_site_transient( self::VERSION_CACHE_KEY, $empty, max( self::check_interval(), 5 * MINUTE_IN_SECONDS ) );
 			return $empty;
 		}
 		$body   = (string) wp_remote_retrieve_body( $response );
@@ -177,7 +198,7 @@ class ALAS_Updater {
 			'requires_php'     => $header( 'Requires PHP' ),
 			'requires_plugins' => $header( 'Requires Plugins' ),
 		);
-		set_site_transient( self::VERSION_CACHE_KEY, $headers, self::CACHE_TTL );
+		set_site_transient( self::VERSION_CACHE_KEY, $headers, self::check_interval() );
 		return $headers;
 	}
 
