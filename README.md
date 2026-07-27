@@ -38,6 +38,39 @@ docker compose run --rm -e LAS_API_KEY \
 
 (Git Bash on Windows: prefix the `run` command with `MSYS_NO_PATHCONV=1`.)
 
+## Updates
+
+The plugin is not on wordpress.org, so it carries its own updater
+(`includes/class-alas-updater.php`) pointed at this repository.
+
+**Releasing is one line: bump `Version:` in `amper-live-assisted-sales.php` and push to `main`.**
+Pushing without touching that header changes nothing on any store; bumping it hands the new code to
+every install. Updates install **unattended** (WordPress cron, twice a day) - a store that wants the
+button back adds `add_filter( 'amper_las_auto_update', '__return_false' );`.
+
+No tags, releases, build step or CI are involved: the update package is GitHub's own
+`archive/refs/heads/main.zip`, and `upgrader_source_selection` points the installer at the
+`plugin/amper-live-assisted-sales` subdirectory inside it. Without that filter WordPress would
+install the archive under its own folder name and leave a second copy of the plugin beside the
+original. `dist/*.zip` from `build-zip.sh` is only for the first install on a store (and for hosts
+where uploading a zip is the only way in).
+
+Before bumping the version, run the change through the local Docker store - the plugin is
+bind-mounted there, so the file you edit is the file that executes:
+
+```sh
+docker exec amper-las-wp-wordpress-1 php -l <changed file>   # WSL has no PHP CLI
+curl -s -o /dev/null -w '%{http_code}' http://localhost:8003/   # 500 means fatal
+docker compose -f dev/docker-compose.yml run --rm -v "$PWD/dev/tests:/tests:ro" wpcli \
+  wp --path=/var/www/html eval-file /tests/test-plugin.php     # 78 unit tests
+sh dev/tests/test-rest.sh                                      # 12 REST edge cases
+```
+
+Updates cannot be rolled back from here - a bad version is fixed by shipping the next one, so the
+gate above is the last chance to catch it. WordPress does protect itself: core refuses an update
+whose `Requires PHP` / `Requires at least` the store fails (the updater passes both through), and
+restores the previous version if the new one fatals on activation.
+
 ## Public demo store (production)
 
 | What | Value |

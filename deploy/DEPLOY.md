@@ -34,13 +34,13 @@ Stores -> Add store -> name "Demo WooCommerce", address `https://demo-wp.ampliap
 provisioning (or later in wp-admin: WooCommerce -> Live Assisted Sales -> Test
 connection).
 
-## Plugin distribution to clients (private)
+## Plugin distribution to clients
 
-Clients install the `dist/amper-live-assisted-sales.zip` file via
-Plugins -> Add New -> Upload Plugin. The zip is shared with our clients only
-(download link; eventually a "WordPress integration" card on the store page in the
-LAS console, next to the API key). The plugin is NOT published to the wordpress.org
-directory.
+The repository is public (GPL-2.0) and the plugin updates itself from it - see "Updates" in the
+root README. A client installs `dist/amper-live-assisted-sales.zip` once via Plugins -> Add New ->
+Upload Plugin; from then on every push to `main` that bumps the `Version:` header reaches their
+store on its own, with nobody clicking. The plugin is NOT published to the wordpress.org directory,
+and the `Update URI` header keeps that directory from ever claiming the slug.
 
 ## Post-deploy verification
 
