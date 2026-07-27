@@ -28,22 +28,32 @@ class ALAS_Updater {
 	/** Directory inside the repo that actually holds the plugin. */
 	const PLUGIN_SUBDIR    = 'plugin/amper-live-assisted-sales';
 	const VERSION_CACHE_KEY = 'amper_las_remote_version';
-	/** Seconds between checks - and therefore the delay between pushing a fix and a shop running it.
-	 *  Two minutes costs GitHub 30 requests an hour per store, half of what an unauthenticated
-	 *  caller is allowed. Override with the `amper_las_update_check_interval` filter. */
-	const DEFAULT_CHECK_INTERVAL = 2 * MINUTE_IN_SECONDS;
+	/**
+	 * Seconds between checks - and therefore the worst-case delay between pushing a fix and a shop
+	 * running it.
+	 *
+	 * Twelve hours is what WordPress core itself uses for update checks and what the de-facto standard
+	 * library for self-hosted plugins (plugin-update-checker) ships as its default, so a store on this
+	 * plugin is checked exactly as often as it is for every wordpress.org plugin it has - no extra
+	 * load, no surprises. A shorter interval buys very little: WP-Cron has no daemon, it rides on page
+	 * loads, so on a quiet shop the check happens when a visitor arrives regardless of the schedule.
+	 *
+	 * Test stores can tick faster - see self::FAST_CHECK_INTERVAL and the "Check for updates
+	 * frequently" setting. Code can override either with the `amper_las_update_check_interval` filter.
+	 */
+	const DEFAULT_CHECK_INTERVAL = 12 * HOUR_IN_SECONDS;
+	/** Interval used when the store opts into frequent checks. 30 requests/h, half GitHub's anonymous allowance. */
+	const FAST_CHECK_INTERVAL    = 2 * MINUTE_IN_SECONDS;
 	const CRON_INTERVAL          = 'amper_las_update_interval';
 
 	const CRON_HOOK = 'amper_las_check_update';
 
 	public static function init() {
-		// WordPress looks for updates twice a day, so a fix pushed at noon could sit unseen on a shop
-		// until the evening. That delay IS the product decision here, so it is cut to five minutes:
-		// a version bump should reach stores while you are still looking at the push.
-		//
-		// WP-Cron has no daemon - it rides on page loads - so on a shop with visitors this lands
-		// within minutes, and on a dead shop it lands with the first visitor. Nothing to install and
-		// nothing for the merchant to do either way.
+		// Our own cron job, rather than riding only on core's update check: core's pass finds the new
+		// version but leaves installing it to the next unattended-update run, and this one does both
+		// in the same tick (see self::check_and_update_now). WP-Cron has no daemon - it rides on page
+		// loads - so on a shop with visitors this lands on schedule, and on a dead shop it lands with
+		// the first visitor. Nothing to install and nothing for the merchant to do either way.
 		add_filter( 'cron_schedules', array( __CLASS__, 'register_interval' ) ); // phpcs:ignore WordPress.WP.CronInterval.ChangeDetected
 		add_action( self::CRON_HOOK, array( __CLASS__, 'check_and_update_now' ) );
 		self::ensure_scheduled();
@@ -66,10 +76,16 @@ class ALAS_Updater {
 	 * @param int $seconds Interval in seconds.
 	 */
 	public static function check_interval() {
-		$seconds = (int) apply_filters( 'amper_las_update_check_interval', self::DEFAULT_CHECK_INTERVAL );
+		$default = self::fast_checks_enabled() ? self::FAST_CHECK_INTERVAL : self::DEFAULT_CHECK_INTERVAL;
+		$seconds = (int) apply_filters( 'amper_las_update_check_interval', $default );
 		// A floor of one minute keeps a mistyped filter from turning every page load into a fetch and
 		// burning through GitHub's hourly allowance.
 		return max( MINUTE_IN_SECONDS, $seconds );
+	}
+
+	/** Whether this store asked to be checked every couple of minutes instead of twice a day. */
+	public static function fast_checks_enabled() {
+		return get_option( 'amper_las_fast_updates', '' ) === 'yes';
 	}
 
 	public static function register_interval( $schedules ) {
@@ -85,7 +101,11 @@ class ALAS_Updater {
 		$next = wp_next_scheduled( self::CRON_HOOK );
 		if ( $next ) {
 			$event = wp_get_scheduled_event( self::CRON_HOOK );
-			if ( $event && self::CRON_INTERVAL === $event->schedule ) {
+			// The interval is compared too, not just the schedule name: both intervals share one name,
+			// so a store that just switched frequent checks on would otherwise keep the old cadence
+			// until the job was cleared by hand.
+			if ( $event && self::CRON_INTERVAL === $event->schedule
+				&& (int) $event->interval === self::check_interval() ) {
 				return;
 			}
 			wp_clear_scheduled_hook( self::CRON_HOOK );
@@ -139,26 +159,27 @@ class ALAS_Updater {
 	}
 
 	/**
-	 * Raw URL of the plugin's main file on the tracked branch - the file carrying `Version:`.
+	 * Contents API URL of the plugin's main file on the tracked branch - the file carrying `Version:`.
 	 *
-	 * The bucket parameter exists because raw.githubusercontent.com serves with `max-age=300`: without
-	 * it the CDN would keep answering with the previous version for up to five minutes, and that delay
-	 * would stack on top of ours. The value changes once per check interval, so repeated calls inside
-	 * one interval still ride the CDN instead of hammering it.
+	 * The API, not raw.githubusercontent.com: raw answers with `Cache-Control: max-age=300`, so for up
+	 * to five minutes after a push it still serves the previous version - and it ignores query-string
+	 * cache busting, so there is no way around that from here (measured: raw said 1.0.9 while the API
+	 * already said 1.0.10). The API answers with the current commit. This is also what the de-facto
+	 * standard library, plugin-update-checker, does: its GitHub integration talks only to
+	 * api.github.com and never touches raw.
 	 */
 	private static function remote_header_url() {
-		$bucket = (int) floor( time() / self::check_interval() );
 		return sprintf(
-			'https://raw.githubusercontent.com/%s/%s/%s/amper-live-assisted-sales.php?bucket=%d',
+			'https://api.github.com/repos/%s/contents/%s/amper-live-assisted-sales.php?ref=%s',
 			self::REPO,
-			self::BRANCH,
 			self::PLUGIN_SUBDIR,
-			$bucket
+			self::BRANCH
 		);
 	}
 
+	/** Same package plugin-update-checker uses for branch updates. */
 	private static function package_url() {
-		return sprintf( 'https://github.com/%s/archive/refs/heads/%s.zip', self::REPO, self::BRANCH );
+		return sprintf( 'https://api.github.com/repos/%s/zipball/%s', self::REPO, self::BRANCH );
 	}
 
 	/**
@@ -182,13 +203,25 @@ class ALAS_Updater {
 				return array_merge( $empty, $cached );
 			}
 		}
-		$response = wp_remote_get( self::remote_header_url(), array( 'timeout' => 8 ) );
+		$response = wp_remote_get(
+			self::remote_header_url(),
+			array(
+				'timeout' => 8,
+				// GitHub rejects API requests without a User-Agent.
+				'headers' => array( 'Accept' => 'application/vnd.github+json', 'User-Agent' => 'amper-las-updater' ),
+			)
+		);
 		if ( is_wp_error( $response ) || (int) wp_remote_retrieve_response_code( $response ) !== 200 ) {
 			// Cache the miss briefly too, so an outage doesn't turn every admin page into a retry.
 			set_site_transient( self::VERSION_CACHE_KEY, $empty, max( self::check_interval(), 5 * MINUTE_IN_SECONDS ) );
 			return $empty;
 		}
-		$body   = (string) wp_remote_retrieve_body( $response );
+		$payload = json_decode( (string) wp_remote_retrieve_body( $response ), true );
+		$body    = isset( $payload['content'] ) ? (string) base64_decode( (string) $payload['content'] ) : '';
+		if ( '' === $body ) {
+			set_site_transient( self::VERSION_CACHE_KEY, $empty, max( self::check_interval(), 5 * MINUTE_IN_SECONDS ) );
+			return $empty;
+		}
 		$header = static function ( $label ) use ( $body ) {
 			return preg_match( '/^\s*\*\s*' . preg_quote( $label, '/' ) . ':\s*(.+)$/mi', $body, $m ) ? trim( $m[1] ) : '';
 		};
@@ -217,13 +250,25 @@ class ALAS_Updater {
 		$headers = self::remote_headers( $forced );
 		$remote  = $headers['version'];
 		if ( ! $remote || ! version_compare( $remote, AMPER_LAS_VERSION, '>' ) ) {
+			// Up to date is still an answer WordPress needs to hear. Since 5.5 a plugin missing from
+			// BOTH `response` and `no_update` is treated as unknown: the Plugins screen drops the
+			// "Automatic updates" column for it, and the unattended pass skips it. Announcing the
+			// current version keeps our own kill switch (self::force_auto_update) visible and honest.
+			$transient->no_update[ self::basename() ] = self::update_object( $remote ?: AMPER_LAS_VERSION, $headers );
 			return $transient;
 		}
-		$update = (object) array(
+		$transient->response[ self::basename() ] = self::update_object( $remote, $headers );
+		unset( $transient->no_update[ self::basename() ] );
+		return $transient;
+	}
+
+	/** The shape wordpress.org returns for a plugin, filled in from the branch headers. */
+	private static function update_object( $version, $headers ) {
+		return (object) array(
 			'id'               => 'github.com/' . self::REPO,
 			'slug'             => self::slug(),
 			'plugin'           => self::basename(),
-			'new_version'      => $remote,
+			'new_version'      => $version,
 			'url'              => 'https://github.com/' . self::REPO,
 			'package'          => self::package_url(),
 			// Core refuses the update (and, importantly, the UNATTENDED one) when the store does
@@ -234,9 +279,6 @@ class ALAS_Updater {
 			'icons'            => array(),
 			'banners'          => array(),
 		);
-		$transient->response[ self::basename() ] = $update;
-		unset( $transient->no_update[ self::basename() ] );
-		return $transient;
 	}
 
 	/** "View details" in the plugins list - without this WordPress asks wordpress.org and 404s. */

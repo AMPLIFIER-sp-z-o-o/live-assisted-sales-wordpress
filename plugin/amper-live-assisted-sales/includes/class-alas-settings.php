@@ -20,6 +20,7 @@ class ALAS_Settings {
 	const OPTION_TEST_STATUS     = 'amper_las_last_test_status';
 	const OPTION_TEST_MESSAGE    = 'amper_las_last_test_message';
 	const OPTION_TEST_AT         = 'amper_las_last_test_at';
+	const OPTION_FAST_UPDATES    = 'amper_las_fast_updates';
 
 	public static function init() {
 		add_action( 'admin_menu', array( __CLASS__, 'register_menu' ), 60 );
@@ -109,6 +110,7 @@ class ALAS_Settings {
 		register_setting( 'amper_las', self::OPTION_API_KEY, $text );
 		register_setting( 'amper_las', self::OPTION_WIDGET_ACCENT, $text );
 		register_setting( 'amper_las', self::OPTION_WIDGET_LOGO, array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw' ) );
+		register_setting( 'amper_las', self::OPTION_FAST_UPDATES, $text );
 	}
 
 	public static function render_page() {
@@ -181,6 +183,22 @@ class ALAS_Settings {
 						<td>
 							<input type="url" class="regular-text" id="amper_las_widget_logo" name="<?php echo esc_attr( self::OPTION_WIDGET_LOGO ); ?>" value="<?php echo esc_attr( get_option( self::OPTION_WIDGET_LOGO, '' ) ); ?>" />
 							<p class="description"><?php esc_html_e( 'Optional. Leave empty to use your theme\'s logo.', 'amper-las' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Updates', 'amper-las' ); ?></th>
+						<td>
+							<p class="description" style="margin-bottom:6px;">
+								<?php
+								/* translators: %s: currently installed plugin version. */
+								echo esc_html( sprintf( __( 'Version %s. The plugin keeps itself up to date - there is nothing to click.', 'amper-las' ), AMPER_LAS_VERSION ) );
+								?>
+							</p>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( self::OPTION_FAST_UPDATES ); ?>" value="yes" <?php checked( ALAS_Updater::fast_checks_enabled() ); ?> />
+								<?php esc_html_e( 'Check for updates every few minutes (test stores only)', 'amper-las' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Off by default: updates are picked up within about half a day, the same rhythm WordPress uses for every other plugin. Turn this on only on a staging or demo store, where you want a change to arrive right after it is published.', 'amper-las' ); ?></p>
 						</td>
 					</tr>
 					<tr>

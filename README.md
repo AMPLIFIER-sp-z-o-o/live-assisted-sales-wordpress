@@ -17,7 +17,7 @@ buy-from-chat.
 - `build-zip.ps1` / `build-zip.sh` - build `dist/*.zip` for Plugins -> Add New -> Upload (CI: Jenkins).
 - `dev/docker-compose.yml` - MariaDB + WordPress (port **8003**) + wp-cli, with the plugin bind-mounted.
 - `dev/provision.sh` - idempotent store setup (WooCommerce + Storefront + sample catalog + PLN/pl_PL + shipping/payments/customer/coupon + plugin config + LAS connection test).
-- `dev/tests/` - backend test suites (78 wp-cli unit tests, 12 REST edge cases, 20 LAS-parity checks).
+- `dev/tests/` - backend test suites (78 wp-cli unit tests, 22 updater checks, 12 REST edge cases, 20 LAS-parity checks).
 - `deploy/` - production deployment (nginx-proxy + Let's Encrypt): `DEVOPS-HANDOFF.md` is the step-by-step runbook.
 
 ## Local test environment
@@ -45,15 +45,31 @@ The plugin is not on wordpress.org, so it carries its own updater
 
 **Releasing is one line: bump `Version:` in `amper-live-assisted-sales.php` and push to `main`.**
 Pushing without touching that header changes nothing on any store; bumping it hands the new code to
-every install. Updates install **unattended** (WordPress cron, twice a day) - a store that wants the
-button back adds `add_filter( 'amper_las_auto_update', '__return_false' );`.
+every install. Updates install **unattended** - a store that wants the button back adds
+`add_filter( 'amper_las_auto_update', '__return_false' );`.
 
-No tags, releases, build step or CI are involved: the update package is GitHub's own
-`archive/refs/heads/main.zip`, and `upgrader_source_selection` points the installer at the
-`plugin/amper-live-assisted-sales` subdirectory inside it. Without that filter WordPress would
-install the archive under its own folder name and leave a second copy of the plugin beside the
-original. `dist/*.zip` from `build-zip.sh` is only for the first install on a store (and for hosts
-where uploading a zip is the only way in).
+Stores check for a new version every **12 hours**, the same cadence WordPress core uses for
+wordpress.org plugins. WooCommerce -> Live Assisted Sales has a **"Check for updates every few
+minutes"** box for staging and demo stores, which drops that to two minutes; leave it off on real
+shops. Either way WP-Cron has no daemon - it rides on page loads - so a shop with no visitors
+updates when its next visitor arrives.
+
+No tags, releases, build step or CI are involved. The version is read from the `Version:` header via
+GitHub's Contents API (`/repos/.../contents/...?ref=main`), and the package is GitHub's own
+`zipball/main`. Not raw.githubusercontent.com: raw is served with `max-age=300` and ignores
+query-string cache busting, so it can answer with the previous version for five minutes after a push.
+`upgrader_source_selection` points the installer at the `plugin/amper-live-assisted-sales`
+subdirectory inside the archive - without that filter WordPress installs the archive under its own
+folder name and leaves a second copy of the plugin beside the original. `dist/*.zip` from
+`build-zip.sh` is only for the first install on a store (and for hosts where uploading a zip is the
+only way in).
+
+> The obvious alternative is the standard library, [plugin-update-checker](https://github.com/YahnisElsts/plugin-update-checker).
+> It does not fit this repo: it resolves the version file as `basename($pluginFile)` at the
+> **repository root**, and our plugin lives in a subdirectory. The class above deliberately mirrors
+> its proven behaviour (same three filters, Contents API, zipball, mock `no_update` entry) rather
+> than inventing another approach. If the plugin ever gets its own root-level repository, swapping in
+> the library is a two-line change.
 
 Before bumping the version, run the change through the local Docker store - the plugin is
 bind-mounted there, so the file you edit is the file that executes:
@@ -63,13 +79,15 @@ docker exec amper-las-wp-wordpress-1 php -l <changed file>   # WSL has no PHP CL
 curl -s -o /dev/null -w '%{http_code}' http://localhost:8003/   # 500 means fatal
 docker compose -f dev/docker-compose.yml run --rm -v "$PWD/dev/tests:/tests:ro" wpcli \
   wp --path=/var/www/html eval-file /tests/test-plugin.php     # 78 unit tests
+docker compose -f dev/docker-compose.yml run --rm -v "$PWD/dev/tests:/tests:ro" wpcli \
+  wp --path=/var/www/html eval-file /tests/test-updater.php    # 22 updater checks (hits GitHub)
 sh dev/tests/test-rest.sh                                      # 12 REST edge cases
 ```
 
 Updates cannot be rolled back from here - a bad version is fixed by shipping the next one, so the
 gate above is the last chance to catch it. WordPress does protect itself: core refuses an update
-whose `Requires PHP` / `Requires at least` the store fails (the updater passes both through), and
-restores the previous version if the new one fatals on activation.
+whose `Requires PHP` / `Requires at least` / `Requires Plugins` the store fails (the updater passes
+all three through), and restores the previous version if the new one fatals on activation.
 
 ## Public demo store (production)
 
