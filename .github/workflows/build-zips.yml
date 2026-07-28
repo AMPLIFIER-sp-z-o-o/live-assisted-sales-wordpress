@@ -1,0 +1,34 @@
+# Builds the installable ZIPs on every push and publishes them as workflow artifacts, so the file
+# handed to the wordpress.org reviewers (or uploaded manually to a store) is always the one built
+# from the exact commit - never a stale copy from someone's local dist/.
+#
+# Where to download: GitHub -> Actions -> latest "Build plugin ZIPs" run -> Artifacts.
+
+name: Build plugin ZIPs
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build all ZIP variants
+        run: ./build-zip.sh
+
+      - name: Upload the wordpress.org submission ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: amper-live-assisted-sales-wporg
+          path: dist/amper-live-assisted-sales-wporg.zip
+
+      - name: Upload the GitHub-distributed ZIP (manual installs)
+        uses: actions/upload-artifact@v4
+        with:
+          name: amper-live-assisted-sales
+          path: dist/amper-live-assisted-sales.zip
