@@ -1,0 +1,42 @@
+# Releases a tagged version to the wordpress.org plugin directory (SVN).
+#
+# DRY UNTIL ACCEPTANCE: this workflow only fires on version tags and needs the SVN_USERNAME /
+# SVN_PASSWORD repository secrets, which exist only after the plugin is accepted into the catalog
+# and the wordpress.org account is created. Until then a tag push simply fails at the deploy step
+# and nothing leaves GitHub.
+#
+# Release flow once live:
+#   1. bump `Version:` in amper-live-assisted-sales.php and `Stable tag:` in readme.txt
+#   2. git tag v1.0.14 && git push --tags
+#   3. this workflow strips the self-updater (directory guideline 8 forbids third-party update
+#      servers) exactly like build-zip.sh does, then mirrors the build to SVN trunk + tags/, and
+#      syncs .wordpress-org/ (icon, banner, screenshots) to the SVN assets directory.
+
+name: Deploy to wordpress.org
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build the catalog variant (no self-updater, no Update URI)
+        run: |
+          mkdir -p build
+          cp -r plugin/amper-live-assisted-sales/. build/
+          rm build/includes/class-alas-updater.php
+          sed -i '/^ \* Update URI:/d' build/amper-live-assisted-sales.php
+
+      - name: Deploy to the wordpress.org SVN
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: amper-live-assisted-sales
+          BUILD_DIR: build
+          ASSETS_DIR: .wordpress-org

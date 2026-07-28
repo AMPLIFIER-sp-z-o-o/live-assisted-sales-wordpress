@@ -71,6 +71,14 @@ Nothing is lost. Conversion events (add to cart, checkout, purchase) are written
 
 Untick **Integration enabled** on the settings page. Deactivating the plugin also stops everything; uninstalling it removes its options and the outbox table.
 
+== Screenshots ==
+
+1. Live activity: every shopper in your store right now, with a buying-intent score and their cart contents.
+2. Dashboard: what deserves attention today - waiting chats, shoppers ready to buy, carts worth recovering.
+3. Analytics: the purchase funnel and cart analysis, including the money left behind in abandoned carts.
+4. Chat inbox: every conversation with filters, statuses, assignments and quality scores.
+5. The chat widget on your storefront - shoppers ask, your team (or the AI assistant) answers.
+
 == Changelog ==
 
 = 1.0.13 =
