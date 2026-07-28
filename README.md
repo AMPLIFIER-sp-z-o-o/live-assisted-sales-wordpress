@@ -15,6 +15,11 @@ buy-from-chat.
   the catalog stays WooCommerce's English sample data, so no content duplication and no paid
   multilingual add-on.
 - `build-zip.ps1` / `build-zip.sh` - build `dist/*.zip` for Plugins -> Add New -> Upload (CI: Jenkins).
+  Also emits `dist/amper-live-assisted-sales-wporg.zip`, the wordpress.org submission build: identical
+  code minus `class-alas-updater.php` and the `Update URI:` header (directory guideline 8 forbids
+  third-party update servers, and a foreign `Update URI` would block catalog-served updates). The
+  mainline code guards every updater reference with `class_exists`/`file_exists`, so the two builds
+  share one source tree - nothing is forked.
 - `dev/docker-compose.yml` - MariaDB + WordPress (port **8003**) + wp-cli, with the plugin bind-mounted.
 - `dev/provision.sh` - idempotent store setup (WooCommerce + Storefront + sample catalog + PLN/pl_PL + shipping/payments/customer/coupon + plugin config + LAS connection test).
 - `dev/tests/` - backend test suites (78 wp-cli unit tests, 28 updater checks, 11 connect-handshake checks, 12 REST edge cases, 20 LAS-parity checks).

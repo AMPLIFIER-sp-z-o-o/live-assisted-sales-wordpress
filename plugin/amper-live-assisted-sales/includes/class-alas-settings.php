@@ -207,6 +207,7 @@ class ALAS_Settings {
 							<p class="description"><?php esc_html_e( 'Optional. Leave empty to use your theme\'s logo.', 'amper-live-assisted-sales' ); ?></p>
 						</td>
 					</tr>
+					<?php if ( class_exists( 'ALAS_Updater' ) ) : // GitHub build only; the wordpress.org build leaves updates to the catalog. ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Updates', 'amper-live-assisted-sales' ); ?></th>
 						<td>
@@ -223,6 +224,7 @@ class ALAS_Settings {
 							<p class="description"><?php esc_html_e( 'Off by default: updates are picked up within about half a day, the same rhythm WordPress uses for every other plugin. Turn this on only on a staging or demo store, where you want a change to arrive right after it is published.', 'amper-live-assisted-sales' ); ?></p>
 						</td>
 					</tr>
+					<?php endif; ?>
 					<tr>
 						<th scope="row"><?php esc_html_e( 'Connection status', 'amper-live-assisted-sales' ); ?></th>
 						<td>

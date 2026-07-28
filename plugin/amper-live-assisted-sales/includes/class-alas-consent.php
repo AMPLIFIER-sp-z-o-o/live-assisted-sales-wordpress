@@ -96,7 +96,7 @@ class ALAS_Consent {
 				'aria_label'      => 'Zgoda na pliki cookies i przetwarzanie danych',
 				'title'           => 'Zależy nam na Twojej prywatności',
 				'body'            => 'Ten sklep używa plików cookies oraz danych o Twoich działaniach, aby działać poprawnie, pomagać Ci na żywo i trafniej dobierać produkty.',
-				'accept_all'      => 'Zaakceptuj wszystko',
+				'accept_all'      => 'Zaakceptuj wszystkie',
 				'only_necessary'  => 'Tylko niezbędne',
 				'preferences'     => 'Preferencje',
 				'prefs_title'     => 'Preferencje prywatności',

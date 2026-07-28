@@ -38,7 +38,12 @@ require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-dispatch.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-tracking.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-rest.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-frontend.php';
-require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-updater.php';
+// The self-updater ships only in the GitHub-distributed build. The wordpress.org build removes
+// the file (directory guideline 8 forbids serving updates from anywhere but wordpress.org) and
+// the catalog takes over update delivery, so everything referencing the class is guarded.
+if ( file_exists( AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-updater.php' ) ) {
+	require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-updater.php';
+}
 
 // Declare compatibility with WooCommerce High-Performance Order Storage (custom order tables).
 add_action( 'before_woocommerce_init', function () {
@@ -53,7 +58,9 @@ add_action( 'plugins_loaded', function () {
 
 	// Before the WooCommerce check on purpose: a store that switched WooCommerce off must still
 	// receive plugin updates instead of being frozen on whatever version it had that day.
-	ALAS_Updater::init();
+	if ( class_exists( 'ALAS_Updater' ) ) {
+		ALAS_Updater::init();
+	}
 
 	if ( ! class_exists( 'WooCommerce' ) ) {
 		add_action( 'admin_notices', function () {
@@ -81,5 +88,7 @@ register_activation_hook( __FILE__, function () {
 
 register_deactivation_hook( __FILE__, function () {
 	ALAS_Outbox::unschedule_cron();
-	wp_clear_scheduled_hook( ALAS_Updater::CRON_HOOK );
+	if ( class_exists( 'ALAS_Updater' ) ) {
+		wp_clear_scheduled_hook( ALAS_Updater::CRON_HOOK );
+	}
 } );

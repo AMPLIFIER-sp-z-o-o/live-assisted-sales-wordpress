@@ -1,7 +1,10 @@
 #!/bin/sh
 # Builds the installable WordPress plugin ZIPs into dist/:
-#   amper-live-assisted-sales.zip  - the product plugin
-#   amper-demo-language.zip        - the demo store's PL/EN switcher
+#   amper-live-assisted-sales.zip        - the product plugin (GitHub-distributed, self-updating)
+#   amper-live-assisted-sales-wporg.zip  - the wordpress.org submission build: same code minus the
+#                                          self-updater (directory guideline 8) and the Update URI
+#                                          header (it would block catalog-served updates)
+#   amper-demo-language.zip              - the demo store's PL/EN switcher
 # Used locally and by the Jenkins pipeline. Uses `zip` when present and falls back to Python's
 # zipfile (WSL images ship Python but often not zip - and a missing zip used to leave dist/ empty
 # because the old script deleted the previous artifact before failing).
@@ -9,10 +12,10 @@ set -eu
 cd "$(dirname "$0")"
 mkdir -p dist
 
-pack() { # <source-parent-dir> <plugin-dir-name>
+pack() { # <source-parent-dir> <plugin-dir-name> [<output-basename>]
   parent="$1"
   name="$2"
-  out="dist/$name.zip"
+  out="dist/${3:-$name}.zip"
   tmp="$out.tmp"
   rm -f "$tmp"
   if command -v zip >/dev/null 2>&1; then
@@ -35,3 +38,14 @@ PY
 
 pack plugin amper-live-assisted-sales
 pack demo-plugins amper-demo-language
+
+# wordpress.org variant: stage a copy, drop the self-updater, strip the Update URI header.
+# The zip's inner directory must still be named amper-live-assisted-sales (it is the slug).
+staging="dist/.staging-wporg"
+rm -rf "$staging"
+mkdir -p "$staging"
+cp -r plugin/amper-live-assisted-sales "$staging/"
+rm "$staging/amper-live-assisted-sales/includes/class-alas-updater.php"
+sed -i '/^ \* Update URI:/d' "$staging/amper-live-assisted-sales/amper-live-assisted-sales.php"
+pack "$staging" amper-live-assisted-sales amper-live-assisted-sales-wporg
+rm -rf "$staging"
