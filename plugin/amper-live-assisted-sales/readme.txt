@@ -37,7 +37,8 @@ Once connected, the plugin sends the following to `https://live-assisted-sales.c
 
 Behavioural telemetry from the browser and any personal data (e-mail, IP) are sent **only after the visitor consents** in the built-in banner. EU visitors are asked for consent before anything is collected; a visitor who declines, or whose browser sends a Global Privacy Control signal, generates no telemetry at all.
 
-Service terms and privacy policy: https://live-assisted-sales.com/terms/
+Service terms: https://live-assisted-sales.com/terms/
+Privacy policy: https://live-assisted-sales.com/privacy/
 
 == Installation ==
 
