@@ -2,7 +2,11 @@
 # handed to the wordpress.org reviewers (or uploaded manually to a store) is always the one built
 # from the exact commit - never a stale copy from someone's local dist/.
 #
-# Where to download: GitHub -> Actions -> latest "Build plugin ZIPs" run -> Artifacts.
+# Where to download:
+#   - stable, no login (linked from the README for merchants):
+#     https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress/releases/download/latest/amper-live-assisted-sales.zip
+#     (the rolling "latest" release below, refreshed on every push to main)
+#   - per-commit: GitHub -> Actions -> "Build plugin ZIPs" run -> Artifacts.
 
 name: Build plugin ZIPs
 
@@ -15,6 +19,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v4
 
@@ -32,3 +38,18 @@ jobs:
         with:
           name: amper-live-assisted-sales
           path: dist/amper-live-assisted-sales.zip
+
+      # Keeps a login-free, stable download URL for merchants. The tag "latest" deliberately does
+      # not match the v* pattern of deploy-wporg.yml, so refreshing it never touches SVN. The tag
+      # is moved to the built commit first so the release's "Source code" links stay honest.
+      - name: Refresh the rolling "latest" release (stable download link)
+        if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git tag -f latest
+          git push -f origin latest
+          gh release view latest >/dev/null 2>&1 || gh release create latest \
+            --title "Latest build" \
+            --notes "Rolling release: always the ZIP built from the current main. Install via Plugins -> Add New -> Upload Plugin."
+          gh release upload latest dist/amper-live-assisted-sales.zip --clobber

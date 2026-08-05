@@ -14,16 +14,17 @@ Do korzystania z wtyczki wymagane jest konto w usłudze AMPER Live Assisted Sale
 - WordPress 6.2 lub nowszy, PHP 8.0 lub nowszy,
 - włączona wtyczka **WooCommerce** (bez niej ta wtyczka się nie aktywuje),
 - dostęp do internetu umożliwiający komunikację z platformą AMPER,
-- plik wtyczki `amper-live-assisted-sales.zip` - otrzymasz go od nas.
+- plik wtyczki `amper-live-assisted-sales.zip` - [pobierz najnowszą wersję](https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress/releases/download/latest/amper-live-assisted-sales.zip).
 
 ## Instalacja krok po kroku
 
-1. Zaloguj się do panelu swojego sklepu (`twojsklep.pl/wp-admin`).
-2. Wejdź w **Wtyczki → Dodaj nową wtyczkę → Wyślij wtyczkę na serwer**.
-3. Wskaż plik `amper-live-assisted-sales.zip`, kliknij **Zainstaluj**, a potem **Włącz wtyczkę**.
-4. Po aktywacji kliknij odnośnik **Ustawienia** przy wtyczce lub przejdź do **WooCommerce → Live Assisted Sales**.
-5. Kliknij **Połącz z AMPER LAS**. Przeniesiemy Cię na live-assisted-sales.com, gdzie logujesz się (lub zakładasz konto) i potwierdzasz połączenie jednym kliknięciem. Klucz API zostanie zapisany automatycznie - nie musisz niczego kopiować ani wklejać.
-6. Gotowe. Dymek czatu pojawia się w sklepie, a w konsoli na live-assisted-sales.com widzisz ruch w czasie rzeczywistym.
+1. Pobierz plik wtyczki: [amper-live-assisted-sales.zip](https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress/releases/download/latest/amper-live-assisted-sales.zip).
+2. Zaloguj się do panelu swojego sklepu (`twojsklep.pl/wp-admin`).
+3. Wejdź w **Wtyczki → Dodaj nową wtyczkę → Wyślij wtyczkę na serwer**.
+4. Wskaż pobrany plik `amper-live-assisted-sales.zip`, kliknij **Zainstaluj**, a potem **Włącz wtyczkę**.
+5. Po aktywacji kliknij odnośnik **Ustawienia** przy wtyczce lub przejdź do **WooCommerce → Live Assisted Sales**.
+6. Kliknij **Połącz z AMPER LAS**. Przeniesiemy Cię na live-assisted-sales.com, gdzie logujesz się (lub zakładasz konto) i potwierdzasz połączenie jednym kliknięciem. Klucz API zostanie zapisany automatycznie - nie musisz niczego kopiować ani wklejać.
+7. Gotowe. Dymek czatu pojawia się w sklepie, a w konsoli na live-assisted-sales.com widzisz ruch w czasie rzeczywistym.
 
 Wolisz zrobić to ręcznie? Na stronie ustawień wklej **Klucz API sklepu** ze strony Twojego sklepu w konsoli, zapisz i kliknij **Przetestuj połączenie**.
 

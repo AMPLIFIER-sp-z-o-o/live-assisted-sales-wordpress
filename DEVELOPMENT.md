@@ -11,7 +11,11 @@ The plugin replicates the amper-b2c reference integration contract 1:1: GA4 stor
   English (browser language by default, PL/EN switcher in the Storefront header). Interface only -
   the catalog stays WooCommerce's English sample data, so no content duplication and no paid
   multilingual add-on.
-- `build-zip.ps1` / `build-zip.sh` - build `dist/*.zip` for Plugins -> Add New -> Upload (CI: Jenkins).
+- `build-zip.ps1` / `build-zip.sh` - build `dist/*.zip` for Plugins -> Add New -> Upload. CI
+  (`.github/workflows/build-zips.yml`) rebuilds them on every push to main and refreshes the rolling
+  `latest` release, so the README's merchant download link
+  (`releases/download/latest/amper-live-assisted-sales.zip`) always serves the current build without
+  a GitHub login.
   Also emits `dist/amper-live-assisted-sales-wporg.zip`, the wordpress.org submission build: identical
   code minus `class-alas-updater.php` and the `Update URI:` header (directory guideline 8 forbids
   third-party update servers, and a foreign `Update URI` would block catalog-served updates). The
