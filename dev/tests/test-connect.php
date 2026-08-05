@@ -22,6 +22,14 @@ $start = ALAS_Connect::start_url();
 ck( false !== strpos( $start, 'action=' . ALAS_Connect::ACTION_START ), 'button points at the start action' );
 ck( false !== strpos( $start, '_wpnonce=' ), 'start is nonce protected (no drive-by connect)' );
 
+echo "== redirect carries the store context ==\n";
+$redirect = ALAS_Connect::connect_redirect_url( 'st-test', str_repeat( 'v', 64 ) );
+$public   = ALAS_Settings::public_base_url();
+ck( 0 === strpos( $redirect, $public ), 'browser redirect uses the PUBLIC address (Docker-safe)', $redirect );
+$lang = strtolower( substr( get_locale(), 0, 2 ) );
+ck( false !== strpos( $redirect, 'language=' . $lang ), "store language '$lang' rides along for the new-store default", $redirect );
+ck( false !== strpos( $redirect, 'platform=woocommerce' ), 'platform is named' );
+
 echo "== challenge matches what LAS expects ==\n";
 $m = new ReflectionMethod( 'ALAS_Connect', 'challenge' );
 $m->setAccessible( true );

@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.0
 Requires Plugins: woocommerce
-Stable tag: 1.0.14
+Stable tag: 1.0.15
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,10 @@ Untick **Integration enabled** on the settings page. Deactivating the plugin als
 5. The chat widget on your storefront - shoppers ask, your team (or the AI assistant) answers.
 
 == Changelog ==
+
+= 1.0.15 =
+* Connecting a store now passes the store's language, so a new store's team language (automatic customer messages, e-mails) matches the shop instead of the AMPER LAS account language.
+* The connection flow opens AMPER LAS through the public widget address when one is configured, so stores behind internal networks (e.g. Docker) can connect too.
 
 = 1.0.14 =
 * Live activity reflects a shopper returning through the browser's back/forward cache: the session resumes immediately and closing the tab afterwards is reported correctly.

@@ -76,7 +76,17 @@ class ALAS_Connect {
 			self::HANDSHAKE_TTL
 		);
 
-		$url = add_query_arg(
+		wp_redirect( self::connect_redirect_url( $state, $verifier ) );
+		exit;
+	}
+
+	/**
+	 * The URL the merchant's BROWSER travels to, so it must use the public address; the server-side
+	 * address may be unreachable from a browser (Docker, internal networks). The code-for-key
+	 * exchange in handle_return stays on the server address.
+	 */
+	public static function connect_redirect_url( $state, $verifier ) {
+		return add_query_arg(
 			array(
 				'state'      => $state,
 				// Only the hash goes out. Whoever intercepts it cannot reverse it into the verifier.
@@ -85,11 +95,12 @@ class ALAS_Connect {
 				'site_url'   => rawurlencode( home_url() ),
 				'site_name'  => rawurlencode( get_bloginfo( 'name' ) ),
 				'platform'   => 'woocommerce',
+				// The store's own language, so a Polish shop greets shoppers in Polish from the
+				// first minute instead of inheriting the LAS account's UI language.
+				'language'   => strtolower( substr( get_locale(), 0, 2 ) ),
 			),
-			trailingslashit( $base ) . 'integrations/wordpress/connect/'
+			trailingslashit( ALAS_Settings::public_base_url() ) . 'integrations/wordpress/connect/'
 		);
-		wp_redirect( $url );
-		exit;
 	}
 
 	private static function challenge( $verifier ) {
