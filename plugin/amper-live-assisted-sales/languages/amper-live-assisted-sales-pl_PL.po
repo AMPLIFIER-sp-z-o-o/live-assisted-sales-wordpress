@@ -66,7 +66,7 @@ msgid "Not connected yet - save your settings, then run the connection test."
 msgstr "Jeszcze nie połączono - zapisz ustawienia, a następnie uruchom test połączenia."
 
 msgid "Test connection"
-msgstr "Testuj połączenie"
+msgstr "Przetestuj połączenie"
 
 msgid "%d event is waiting to be delivered to LAS."
 msgid_plural "%d events are waiting to be delivered to LAS."
