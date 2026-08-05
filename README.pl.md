@@ -22,9 +22,9 @@ Do korzystania z wtyczki wymagane jest konto w usłudze AMPER Live Assisted Sale
 
 1. Pobierz plik wtyczki: [amper-live-assisted-sales.zip](https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress/releases/download/latest/amper-live-assisted-sales.zip).
 2. Zaloguj się do panelu swojego sklepu (`twojsklep.pl/wp-admin`).
-3. Wejdź w **Wtyczki → Dodaj nową wtyczkę → Wyślij wtyczkę na serwer**.
+3. Wejdź w **Wtyczki → Dodaj wtyczkę → Wyślij wtyczkę na serwer**.
 4. Wybierz plik `amper-live-assisted-sales.zip`, kliknij **Zainstaluj**, a potem **Włącz wtyczkę**.
-5. Po aktywacji kliknij odnośnik **Ustawienia** przy wtyczce lub przejdź do **WooCommerce → Live Assisted Sales**.
+5. Po aktywacji wtyczka sama otworzy stronę ustawień. Gdyby tak się nie stało, kliknij odnośnik **Ustawienia** przy wtyczce lub przejdź do **WooCommerce → Live Assisted Sales**.
 6. Kliknij **Połącz z AMPER LAS**. Przeniesiemy Cię na live-assisted-sales.com, gdzie logujesz się (lub zakładasz konto) i potwierdzasz połączenie jednym kliknięciem. Klucz API zostanie zapisany automatycznie - nie musisz niczego kopiować ani wklejać.
 7. Gotowe. Dymek czatu pojawia się w sklepie, a w konsoli na live-assisted-sales.com widzisz ruch w czasie rzeczywistym.
 

@@ -24,7 +24,7 @@ An AMPER Live Assisted Sales account is required - once your store is connected,
 2. Log in to your store's admin panel (`yourstore.com/wp-admin`).
 3. Go to **Plugins → Add New Plugin → Upload Plugin**.
 4. Choose the `amper-live-assisted-sales.zip` file, click **Install Now**, then **Activate Plugin**.
-5. After activation, click the **Settings** link next to the plugin, or go to **WooCommerce → Live Assisted Sales**.
+5. After activation, the plugin opens its settings page for you. If it does not, click the **Settings** link next to the plugin, or go to **WooCommerce → Live Assisted Sales**.
 6. Click **Connect to AMPER LAS**. You will be taken to live-assisted-sales.com, where you sign in (or create an account) and confirm the connection with one click. The API key is saved automatically - nothing to copy or paste.
 7. Done. The chat bubble appears in your store, and the console at live-assisted-sales.com shows your traffic in real time.
 
