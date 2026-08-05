@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.0
 Requires Plugins: woocommerce
-Stable tag: 1.0.15
+Stable tag: 1.0.16
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,9 @@ Untick **Integration enabled** on the settings page. Deactivating the plugin als
 5. The chat widget on your storefront - shoppers ask, your team (or the AI assistant) answers.
 
 == Changelog ==
+
+= 1.0.16 =
+* Clearing or changing the store API key immediately resets the connection status and brings the "Connect to AMPER LAS" button back, instead of keeping a stale "Connected" state.
 
 = 1.0.15 =
 * Connecting a store now passes the store's language, so a new store's team language (automatic customer messages, e-mails) matches the shop instead of the AMPER LAS account language.

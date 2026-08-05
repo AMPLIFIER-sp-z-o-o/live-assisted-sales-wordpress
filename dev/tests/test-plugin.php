@@ -189,9 +189,26 @@ t_ok( strpos( $env2['visitor_id'], 'visitor-' ) === 0, 'visitor fallback uuid pr
 
 echo "== I. Dispatch guards ==\n";
 t_eq( ALAS_Dispatch::dispatch( 'nonsense_event', array() ), false, 'unsupported event type rejected' );
-$saved_key = ALAS_Settings::api_key();
+$saved_key    = ALAS_Settings::api_key();
+$saved_public = ALAS_Settings::site_public_key();
 update_option( 'amper_las_api_key', '' );
 t_eq( ALAS_Dispatch::dispatch( 'view_item', array() ), false, 'unconfigured -> dispatch refused' );
+update_option( 'amper_las_api_key', $saved_key );
+
+echo "== I2. Stale connection state ==\n";
+// The fetched public key belongs to one API key; changing or clearing the key must forget it,
+// or the settings page keeps claiming "Connected" and hides the Connect button.
+update_option( 'amper_las_site_public_key', 'site_pk_stale_test' );
+update_option( 'amper_las_api_key', 'different-key-for-stale-test' );
+t_eq( ALAS_Settings::site_public_key(), '', 'changing the API key forgets the public key' );
+update_option( 'amper_las_site_public_key', 'site_pk_stale_test' );
+update_option( 'amper_las_api_key', '' );
+t_eq( ALAS_Settings::site_public_key(), '', 'clearing the API key forgets the public key' );
+update_option( 'amper_las_site_public_key', 'site_pk_stale_test' );
+update_option( 'amper_las_api_key', 'same-key-twice' );
+update_option( 'amper_las_site_public_key', 'site_pk_stale_test' );
+update_option( 'amper_las_api_key', 'same-key-twice' );
+t_eq( ALAS_Settings::site_public_key(), 'site_pk_stale_test', 're-saving the same key keeps the public key' );
 update_option( 'amper_las_api_key', $saved_key );
 
 echo "== J. Outbox state machine ==\n";
@@ -206,6 +223,8 @@ update_option( 'amper_las_api_key', '' );
 t_eq( ALAS_Outbox::deliver_row( $row_id ), false, 'unconfigured deliver_row -> false' );
 t_eq( (int) $wpdb->get_var( $wpdb->prepare( "SELECT attempts FROM {$table} WHERE id=%d", $row_id ) ), 0, 'unconfigured keeps attempts at 0' );
 update_option( 'amper_las_api_key', $saved_key );
+// The key round-trips above wiped the fetched public key (by design) - put the real one back.
+update_option( 'amper_las_site_public_key', $saved_public );
 
 // Dead target burns attempts, hits FAILED at 8.
 $saved_url = get_option( 'amper_las_base_url' );

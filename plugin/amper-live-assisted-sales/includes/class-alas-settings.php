@@ -29,6 +29,20 @@ class ALAS_Settings {
 		add_action( 'admin_menu', array( __CLASS__, 'register_menu' ), 60 );
 		add_action( 'admin_init', array( __CLASS__, 'register_settings' ) );
 		add_action( 'wp_ajax_amper_las_test_connection', array( __CLASS__, 'ajax_test_connection' ) );
+		add_action( 'update_option_' . self::OPTION_API_KEY, array( __CLASS__, 'forget_stale_connection' ), 10, 2 );
+	}
+
+	/**
+	 * A changed (or cleared) API key invalidates the public widget key fetched with the old one.
+	 * Without this, a merchant who clears the key still sees "Connected" and loses the Connect
+	 * button - the page reads the stale public key. The connection test re-fetches the public key
+	 * right after a successful connect, so a real key change heals itself in the same flow.
+	 */
+	public static function forget_stale_connection( $old_value, $value ) {
+		if ( trim( (string) $old_value ) === trim( (string) $value ) ) {
+			return;
+		}
+		update_option( self::OPTION_SITE_PUBLIC_KEY, '', false );
 	}
 
 	// ---- Accessors --------------------------------------------------------
