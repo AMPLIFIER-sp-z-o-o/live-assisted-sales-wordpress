@@ -9,22 +9,22 @@ Stable tag: 1.0.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Connect your WooCommerce store to the AMPER Live Assisted Sales platform: live visitor activity, purchase-intent scoring and a chat widget with AI assistance.
+Connect your WooCommerce store to the AMPER Live Assisted Sales platform: real-time visitor activity, purchase-probability scoring and a chat widget with AI assistance.
 
 == Description ==
 
 AMPER Live Assisted Sales (LAS) gives your store a live sales console:
 
-* **Real-time visitor activity** - see who is browsing, what they view, search for, add to the cart and buy (GA4 e-commerce event taxonomy).
-* **Purchase-intent scoring** - LAS scores every visit (low / medium / high intent) so your team helps the right shopper at the right moment.
-* **Live chat widget** - a lightweight chat bubble with AI assistance, product suggestions and buy-from-chat (products suggested in chat land straight in the WooCommerce cart).
-* **Privacy first** - a built-in GDPR consent banner for EU visitors (prior consent, one-click decline, preferences modal, Global Privacy Control honoured). Without consent, no behavioural data leaves the browser and no PII is forwarded.
+* **Real-time visitor activity** - see how many visitors are in your store right now, what they view and search for, what they have in the cart and which orders they have placed (GA4 e-commerce event taxonomy).
+* **Purchase-probability scoring** - every visit receives a purchase-probability score (low / medium / high) so your team helps the right shopper at the right moment.
+* **Live chat widget** - a lightweight chat bubble with AI assistance, product suggestions and adding products to the WooCommerce cart without leaving the conversation.
+* **Privacy first** - a built-in GDPR consent banner for EU visitors (prior consent, one-click decline, preferences modal, Global Privacy Control honoured). Without consent, no behavioural data and no personal data are sent to the AMPER platform.
 
-The plugin sends business events (add to cart, checkout, purchase) server-side for accuracy, with a durable outbox and automatic retry, so a temporary network problem never loses a conversion event.
+The plugin sends business events (add to cart, checkout, purchase) server-side for accuracy, with a durable outbox and automatic retry, so temporary network problems do not cause the loss of a conversion event.
 
 == External services ==
 
-This plugin is a client for AMPER Live Assisted Sales, a hosted service operated by AMPLIFIER sp. z o.o. **The plugin does nothing on its own** - it requires an account at https://live-assisted-sales.com, and no data is sent anywhere until you enter your store's API key and the connection test succeeds. The service is paid after a 7-day trial.
+This plugin is a client for AMPER Live Assisted Sales, a hosted service operated by AMPLIFIER sp. z o.o. An account at https://live-assisted-sales.com is required - once your store is connected, all features are available right away. Creating an account is free and the first 7 days are a trial; after that the service is paid. No data is sent anywhere until you connect your store and the connection test succeeds.
 
 Once connected, the plugin sends the following to `https://live-assisted-sales.com`:
 
@@ -35,7 +35,7 @@ Once connected, the plugin sends the following to `https://live-assisted-sales.c
 * **IP address** - used for approximate location and abuse protection.
 * **Chat messages** - anything a shopper types into the chat widget, together with any file they attach.
 
-Behavioural telemetry from the browser and any personal data (e-mail, IP) are sent **only after the visitor consents** in the built-in banner. EU visitors are asked for consent before anything is collected; a visitor who declines, or whose browser sends a Global Privacy Control signal, generates no telemetry at all.
+Behavioural telemetry from the browser and any personal data (e-mail, IP) are sent **only after the visitor consents** in the built-in banner. EU visitors are asked for consent before anything is collected; without consent, no behavioural data and no personal data are sent to the AMPER platform. A visitor who declines, or whose browser sends a Global Privacy Control signal, generates no telemetry at all.
 
 Service terms: https://live-assisted-sales.com/terms/
 Privacy policy: https://live-assisted-sales.com/privacy/
@@ -43,17 +43,17 @@ Privacy policy: https://live-assisted-sales.com/privacy/
 == Installation ==
 
 1. Install the plugin and activate it. WooCommerce must be active - WordPress will not let the plugin activate without it.
-2. Follow the setup notice, or go to **WooCommerce → Live Assisted Sales**.
-3. Click **Connect to AMPER LAS**. You will be taken to live-assisted-sales.com to sign in (or create a free account) and confirm the connection; your store is registered and the API key is saved for you automatically.
+2. After activation, click the **Settings** link next to the plugin, or go to **WooCommerce → Live Assisted Sales**.
+3. Click **Connect to AMPER LAS**. You will be taken to live-assisted-sales.com to sign in (or create a free account) and confirm the connection; your store is registered and the API key is saved automatically - nothing to copy or paste.
 4. That is it - the chat widget appears on your storefront and events start flowing to the console.
 
-Prefer to do it by hand? Paste the store API key from your store's page in the console into **Store API key**, save, then click **Test connection**.
+You can also connect the store manually: paste the store API key from your store's page in the console into **Store API key**, save, then click **Test connection**.
 
 == Frequently Asked Questions ==
 
 = Do I need an account? =
 
-Yes. The plugin is a client for the AMPER Live Assisted Sales service and does nothing without one. You can create an account for free and the first 7 days are a trial.
+Yes. The plugin is a client for the AMPER Live Assisted Sales service, so an account is required. Creating one is free and the first 7 days are a trial.
 
 = Where do I get an API key? =
 
@@ -61,7 +61,7 @@ You do not need to fetch it by hand - **Connect to AMPER LAS** on the settings p
 
 = Does the plugin slow my store down? =
 
-No. Telemetry is batched in the browser; server events are sent asynchronously (non-blocking) or after the response has been flushed, and conversion events are queued in a local outbox with retry.
+No. Data is sent asynchronously and does not block page loads: telemetry is batched in the browser, server events go out after the response has been flushed, and conversion events are queued in a local outbox with retry - temporary network problems do not cause the loss of events.
 
 = What happens if the LAS platform is unreachable? =
 
@@ -69,7 +69,7 @@ Nothing is lost. Conversion events (add to cart, checkout, purchase) are written
 
 = How do I stop sending data? =
 
-Untick **Integration enabled** on the settings page. Deactivating the plugin also stops everything; uninstalling it removes its options and the outbox table.
+Untick **Integration enabled** on the settings page. Deactivating the plugin also stops everything; uninstalling it removes its options and the outbox table from your WordPress database.
 
 == Screenshots ==
 
