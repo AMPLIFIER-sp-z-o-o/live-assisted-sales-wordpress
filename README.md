@@ -46,7 +46,7 @@ EU visitors see a consent banner first - without consent, no behavioural data an
 
 ## Support
 
-Something not working, or have a question? Write to us - contact details are at [live-assisted-sales.com](https://live-assisted-sales.com).
+Something not working, or have a question? Write to us: [support@ampliapps.com](mailto:support@ampliapps.com).
 
 ---
 

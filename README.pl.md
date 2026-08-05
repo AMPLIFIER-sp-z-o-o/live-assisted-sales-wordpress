@@ -46,7 +46,7 @@ Odwiedzający z UE najpierw widzą baner zgody - bez zgody dane o zachowaniu ani
 
 ## Pomoc
 
-Coś nie działa albo masz pytanie? Napisz do nas - dane kontaktowe znajdziesz na [live-assisted-sales.com](https://live-assisted-sales.com).
+Coś nie działa albo masz pytanie? Napisz do nas: [support@ampliapps.com](mailto:support@ampliapps.com).
 
 ---
 
