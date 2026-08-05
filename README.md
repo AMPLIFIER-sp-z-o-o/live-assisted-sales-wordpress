@@ -1,51 +1,53 @@
-# AMPER Live Assisted Sales - wtyczka WordPress / WooCommerce
+# AMPER Live Assisted Sales - WordPress / WooCommerce plugin
 
-AMPER Live Assisted Sales łączy Twój sklep WooCommerce z platformą [AMPER](https://live-assisted-sales.com), dzięki której możesz obserwować odwiedzających w czasie rzeczywistym, rozmawiać z nimi na czacie i zwiększać sprzedaż.
+**English** | [Polski](README.pl.md)
 
-- **widzisz w czasie rzeczywistym, ilu odwiedzających jest w sklepie** - co oglądają, czego szukają, co mają w koszyku i jakie zamówienia złożyli,
-- **wiesz, komu pomóc najpierw** - każda wizyta otrzymuje ocenę prawdopodobieństwa zakupu (niska / średnia / wysoka),
-- **rozmawiasz z klientami przez czat** - dymek czatu w sklepie, podpowiedzi AI, polecanie produktów oraz dodawanie ich do koszyka bez opuszczania rozmowy,
-- **dbasz o zgodę odwiedzających z UE** - dzięki wbudowanemu banerowi zgody; bez zgody dane o zachowaniu ani dane osobowe nie są wysyłane do platformy AMPER.
+AMPER Live Assisted Sales connects your WooCommerce store to the [AMPER platform](https://live-assisted-sales.com), so you can watch visitors in real time, chat with them and grow your sales.
 
-Do korzystania z wtyczki wymagane jest konto w usłudze AMPER Live Assisted Sales - po połączeniu sklepu wszystkie funkcje są dostępne od razu. Konto jest bezpłatne, a przez pierwsze 7 dni możesz korzystać z okresu próbnego.
+- **see in real time how many visitors are in your store** - what they view and search for, what they have in the cart and which orders they have placed,
+- **know who to help first** - every visit receives a purchase-probability score (low / medium / high),
+- **chat with your customers** - a chat bubble in the store, AI assistance, product suggestions and adding products to the cart without leaving the conversation,
+- **collect EU visitors' consent** - with the built-in consent banner; without consent, no behavioural data and no personal data are sent to the AMPER platform.
 
-## Czego potrzebujesz
+An AMPER Live Assisted Sales account is required - once your store is connected, all features are available right away. The account is free and the first 7 days are a trial.
 
-- WordPress 6.2 lub nowszy, PHP 8.0 lub nowszy,
-- włączona wtyczka **WooCommerce** (bez niej ta wtyczka się nie aktywuje),
-- dostęp do internetu umożliwiający komunikację z platformą AMPER,
-- najnowsza wersja wtyczki - [amper-live-assisted-sales.zip](https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress/releases/download/latest/amper-live-assisted-sales.zip).
+## What you need
 
-## Instalacja krok po kroku
+- WordPress 6.2 or newer, PHP 8.0 or newer,
+- the **WooCommerce** plugin active (this plugin will not activate without it),
+- internet access allowing communication with the AMPER platform,
+- the latest plugin version - [amper-live-assisted-sales.zip](https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress/releases/download/latest/amper-live-assisted-sales.zip).
 
-1. Pobierz plik wtyczki: [amper-live-assisted-sales.zip](https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress/releases/download/latest/amper-live-assisted-sales.zip).
-2. Zaloguj się do panelu swojego sklepu (`twojsklep.pl/wp-admin`).
-3. Wejdź w **Wtyczki → Dodaj nową wtyczkę → Wyślij wtyczkę na serwer**.
-4. Wybierz plik `amper-live-assisted-sales.zip`, kliknij **Zainstaluj**, a potem **Włącz wtyczkę**.
-5. Po aktywacji kliknij odnośnik **Ustawienia** przy wtyczce lub przejdź do **WooCommerce → Live Assisted Sales**.
-6. Kliknij **Połącz z AMPER LAS**. Przeniesiemy Cię na live-assisted-sales.com, gdzie logujesz się (lub zakładasz konto) i potwierdzasz połączenie jednym kliknięciem. Klucz API zostanie zapisany automatycznie - nie musisz niczego kopiować ani wklejać.
-7. Gotowe. Dymek czatu pojawia się w sklepie, a w konsoli na live-assisted-sales.com widzisz ruch w czasie rzeczywistym.
+## Step-by-step installation
 
-Możesz również połączyć sklep ręcznie: na stronie ustawień wklej **Klucz API sklepu** ze strony Twojego sklepu w konsoli, zapisz i kliknij **Przetestuj połączenie**.
+1. Download the plugin file: [amper-live-assisted-sales.zip](https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress/releases/download/latest/amper-live-assisted-sales.zip).
+2. Log in to your store's admin panel (`yourstore.com/wp-admin`).
+3. Go to **Plugins → Add New Plugin → Upload Plugin**.
+4. Choose the `amper-live-assisted-sales.zip` file, click **Install Now**, then **Activate Plugin**.
+5. After activation, click the **Settings** link next to the plugin, or go to **WooCommerce → Live Assisted Sales**.
+6. Click **Connect to AMPER LAS**. You will be taken to live-assisted-sales.com, where you sign in (or create an account) and confirm the connection with one click. The API key is saved automatically - nothing to copy or paste.
+7. Done. The chat bubble appears in your store, and the console at live-assisted-sales.com shows your traffic in real time.
 
-## Częste pytania
+You can also connect the store manually: on the settings page, paste the **Store API key** from your store's page in the console, save, then click **Test connection**.
 
-**Czy wtyczka spowolni mój sklep?**
-Nie. Dane są wysyłane asynchronicznie i nie blokują ładowania strony, a zdarzenia sprzedażowe (koszyk, zamówienie) trafiają do lokalnej kolejki z ponawianiem - chwilowe problemy z siecią nie powodują utraty zdarzeń.
+## Frequently asked questions
 
-**Czy muszę pilnować aktualizacji?**
-Nie. Nowe wersje będą instalowane automatycznie, tak jak w przypadku innych wtyczek WordPressa.
+**Will the plugin slow my store down?**
+No. Data is sent asynchronously and does not block page loads, and sales events (cart, order) go through a local queue with retry - temporary network problems do not cause the loss of events.
 
-**Jak wstrzymać wysyłanie danych?**
-W **WooCommerce → Live Assisted Sales** odznacz **Integracja włączona**. Wyłączenie wtyczki też zatrzymuje wszystko, a jej odinstalowanie usuwa ustawienia i kolejkę zdarzeń z lokalnej bazy danych WordPressa.
+**Do I need to keep an eye on updates?**
+No. New versions are installed automatically, just like other WordPress plugins.
 
-**Co z danymi moich klientów?**
-Odwiedzający z UE najpierw widzą baner zgody - bez zgody dane o zachowaniu ani dane osobowe nie są wysyłane do platformy AMPER. Szczegółowe informacje znajdziesz w naszym [Regulaminie](https://live-assisted-sales.com/terms/) oraz [Polityce prywatności](https://live-assisted-sales.com/privacy/).
+**How do I pause sending data?**
+In **WooCommerce → Live Assisted Sales**, untick **Integration enabled**. Deactivating the plugin also stops everything, and uninstalling it removes its settings and the event queue from your WordPress database.
 
-## Pomoc
+**What about my customers' data?**
+EU visitors see a consent banner first - without consent, no behavioural data and no personal data are sent to the AMPER platform. For details, see our [Terms of Service](https://live-assisted-sales.com/terms/) and [Privacy Policy](https://live-assisted-sales.com/privacy/).
 
-Coś nie działa albo masz pytanie? Napisz do nas - dane kontaktowe znajdziesz na [live-assisted-sales.com](https://live-assisted-sales.com).
+## Support
+
+Something not working, or have a question? Write to us - contact details are at [live-assisted-sales.com](https://live-assisted-sales.com).
 
 ---
 
-Dokumentacja techniczna (środowisko deweloperskie, testy, wydawanie wersji, architektura integracji): [DEVELOPMENT.md](DEVELOPMENT.md).
+Technical documentation (development environment, tests, releasing, integration architecture): [DEVELOPMENT.md](DEVELOPMENT.md).
