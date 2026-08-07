@@ -4,7 +4,7 @@
  * Plugin URI: https://live-assisted-sales.com/
  * Update URI: https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress
  * Description: Connects your WooCommerce store to the AMPER Live Assisted Sales platform: real-time visitor tracking (GA4 event taxonomy), GDPR consent banner, live chat widget with buy-from-chat and AI assistance.
- * Version: 1.0.16
+ * Version: 1.0.17
  * Author: AMPER
  * Author URI: https://live-assisted-sales.com/
  * License: GPL v2 or later
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'AMPER_LAS_VERSION', '1.0.16' );
+define( 'AMPER_LAS_VERSION', '1.0.17' );
 define( 'AMPER_LAS_PLUGIN_FILE', __FILE__ );
 define( 'AMPER_LAS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'AMPER_LAS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

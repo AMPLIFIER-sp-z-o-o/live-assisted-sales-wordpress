@@ -81,6 +81,33 @@
     return value;
   }
 
+  // Bind the persisted visitor id to the account it tracks ("" while anonymous). The id
+  // is rotated ONLY when a different person shows up on this browser:
+  // - same owner, and anonymous -> login (the same person identifying themselves): keep
+  //   the ids, so the pre-login history continues under the account,
+  // - account -> different account, or account -> anonymous (logout / handed-over
+  //   browser): rotate, so two customers never mix under one visitor id.
+  function ensureIdentityOwner() {
+    var ownerKey = "las_identity_owner";
+    var owner = "";
+    var customer = config.customer;
+    if (customer && typeof customer === "object" && (customer.external_id || customer.email)) {
+      owner = (customer.external_id || "") + "|" + (customer.email || "");
+    }
+    var stored = null;
+    try { stored = localStorage.getItem(ownerKey); } catch (error) { return; }
+    if (stored === owner) return;
+    if (stored) {
+      try { localStorage.removeItem("las_visitor_id"); } catch (error) {}
+      try { sessionStorage.removeItem("las_session_id"); } catch (error) {}
+      ["las_visitor_id", "las_session_id"].forEach(function (name) {
+        document.cookie = name + "=; Max-Age=0; path=/; SameSite=Lax";
+      });
+    }
+    try { localStorage.setItem(ownerKey, owner); } catch (error) {}
+  }
+  ensureIdentityOwner();
+
   function publishWidgetCustomer() {
     var customer = config.customer;
     window.LAS_CUSTOMER = customer && typeof customer === "object" && customer.id ? customer : {};

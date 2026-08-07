@@ -5,7 +5,7 @@ Requires at least: 6.2
 Tested up to: 7.0
 Requires PHP: 8.0
 Requires Plugins: woocommerce
-Stable tag: 1.0.16
+Stable tag: 1.0.17
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -80,6 +80,9 @@ Untick **Integration enabled** on the settings page. Deactivating the plugin als
 5. The chat widget on your storefront - shoppers ask, your team (or the AI assistant) answers.
 
 == Changelog ==
+
+= 1.0.17 =
+* The visitor identity is now bound to the signed-in account: logging out or switching accounts on a shared browser starts a fresh visitor, so two customers can never mix in one activity row or chat history. An anonymous visitor who signs in keeps their history under the account, as before.
 
 = 1.0.16 =
 * Clearing or changing the store API key immediately resets the connection status and brings the "Connect to AMPER LAS" button back, instead of keeping a stale "Connected" state.
