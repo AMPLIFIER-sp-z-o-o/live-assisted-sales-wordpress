@@ -9,6 +9,8 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 
 $options = array(
 	'amper_las_enabled',
+	'amper_las_chat_enabled',
+	'amper_las_trust_proxy',
 	'amper_las_base_url',
 	'amper_las_public_base_url',
 	'amper_las_api_key',

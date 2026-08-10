@@ -83,7 +83,7 @@ class ALAS_Payloads {
 		 * @param bool   $trusted Whether the forwarded chain may be trusted.
 		 * @param string $remote  REMOTE_ADDR for this request.
 		 */
-		$trusted = (bool) apply_filters( 'amper_las_trust_forwarded_for', false, $remote );
+		$trusted = (bool) apply_filters( 'amper_las_trust_forwarded_for', ALAS_Settings::is_proxy_trusted(), $remote );
 		if ( ! $trusted ) {
 			return $remote;
 		}

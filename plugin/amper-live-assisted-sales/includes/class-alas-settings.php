@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 class ALAS_Settings {
 
 	const OPTION_ENABLED         = 'amper_las_enabled';
+	const OPTION_CHAT_ENABLED    = 'amper_las_chat_enabled';
+	const OPTION_TRUST_PROXY     = 'amper_las_trust_proxy';
 	const OPTION_BASE_URL        = 'amper_las_base_url';
 	const OPTION_PUBLIC_BASE_URL = 'amper_las_public_base_url';
 	const OPTION_API_KEY         = 'amper_las_api_key';
@@ -95,9 +97,22 @@ class ALAS_Settings {
 		return self::is_enabled() && self::base_url() !== '' && self::api_key() !== '';
 	}
 
+	/**
+	 * Whether the merchant wants the chat bubble at all. Separate from the integration
+	 * switch: turning the chat off keeps visitor tracking fully alive.
+	 */
+	public static function is_chat_enabled() {
+		return get_option( self::OPTION_CHAT_ENABLED, 'yes' ) === 'yes';
+	}
+
+	/** Whether the store declared it runs behind a rewriting proxy/CDN (Cloudflare etc.). */
+	public static function is_proxy_trusted() {
+		return get_option( self::OPTION_TRUST_PROXY, '' ) === 'yes';
+	}
+
 	/** Widget configured = the chat widget can be embedded (public key already fetched). */
 	public static function is_widget_configured() {
-		return self::is_configured() && self::site_public_key() !== '';
+		return self::is_configured() && self::is_chat_enabled() && self::site_public_key() !== '';
 	}
 
 	public static function record_test_result( $status, $message ) {
@@ -122,6 +137,8 @@ class ALAS_Settings {
 	public static function register_settings() {
 		$text = array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' );
 		register_setting( 'amper_las', self::OPTION_ENABLED, $text );
+		register_setting( 'amper_las', self::OPTION_CHAT_ENABLED, $text );
+		register_setting( 'amper_las', self::OPTION_TRUST_PROXY, $text );
 		register_setting( 'amper_las', self::OPTION_BASE_URL, array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw' ) );
 		register_setting( 'amper_las', self::OPTION_PUBLIC_BASE_URL, array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw' ) );
 		register_setting( 'amper_las', self::OPTION_API_KEY, $text );
@@ -181,6 +198,26 @@ class ALAS_Settings {
 								<input type="checkbox" name="<?php echo esc_attr( self::OPTION_ENABLED ); ?>" value="yes" <?php checked( self::is_enabled() ); ?> />
 								<?php esc_html_e( 'Send events to Live Assisted Sales and show the chat widget', 'amper-live-assisted-sales' ); ?>
 							</label>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Chat widget', 'amper-live-assisted-sales' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( self::OPTION_CHAT_ENABLED ); ?>" value="yes" <?php checked( self::is_chat_enabled() ); ?> />
+								<?php esc_html_e( 'Show the chat bubble on your store', 'amper-live-assisted-sales' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Untick to hide only the chat - visitor tracking and the live console keep working.', 'amper-live-assisted-sales' ); ?></p>
+						</td>
+					</tr>
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Proxy / CDN', 'amper-live-assisted-sales' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( self::OPTION_TRUST_PROXY ); ?>" value="yes" <?php checked( self::is_proxy_trusted() ); ?> />
+								<?php esc_html_e( 'My store runs behind a proxy or CDN (e.g. Cloudflare)', 'amper-live-assisted-sales' ); ?>
+							</label>
+							<p class="description"><?php esc_html_e( 'Tick only in that case: the console will then read visitor addresses from the proxy\'s X-Forwarded-For header. On a store without a proxy this header can be forged by visitors, so leave it off.', 'amper-live-assisted-sales' ); ?></p>
 						</td>
 					</tr>
 					<tr>

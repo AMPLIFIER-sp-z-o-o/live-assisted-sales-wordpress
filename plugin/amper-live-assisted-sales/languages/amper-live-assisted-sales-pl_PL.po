@@ -196,3 +196,21 @@ msgstr "Połączono z AMPER LAS jako „%s”. Widget czatu działa już w Twoim
 
 msgid "Connected to AMPER LAS. The chat widget is live on your storefront."
 msgstr "Połączono z AMPER LAS. Widget czatu działa już w Twoim sklepie."
+
+msgid "Chat widget"
+msgstr "Widget czatu"
+
+msgid "Show the chat bubble on your store"
+msgstr "Pokazuj dymek czatu w sklepie"
+
+msgid "Untick to hide only the chat - visitor tracking and the live console keep working."
+msgstr "Odznacz, aby ukryć sam czat - śledzenie odwiedzających i konsola na żywo dalej działają."
+
+msgid "Proxy / CDN"
+msgstr "Proxy / CDN"
+
+msgid "My store runs behind a proxy or CDN (e.g. Cloudflare)"
+msgstr "Mój sklep działa za proxy lub CDN (np. Cloudflare)"
+
+msgid "Tick only in that case: the console will then read visitor addresses from the proxy's X-Forwarded-For header. On a store without a proxy this header can be forged by visitors, so leave it off."
+msgstr "Zaznacz tylko w takim przypadku: konsola odczyta wtedy adresy odwiedzających z nagłówka X-Forwarded-For od proxy. W sklepie bez proxy ten nagłówek może być sfałszowany przez odwiedzających, więc zostaw wyłączone."

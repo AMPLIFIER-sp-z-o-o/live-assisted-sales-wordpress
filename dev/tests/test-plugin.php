@@ -258,5 +258,36 @@ t_ok( (bool) wc_get_order( $test_order->get_id() )->get_meta( '_amper_las_visito
 $test_order->delete( true );
 wp_delete_post( $bare_id, true );
 
+echo "== L. Chat-only kill switch ==\n";
+$saved_chat = get_option( ALAS_Settings::OPTION_CHAT_ENABLED, 'yes' );
+update_option( ALAS_Settings::OPTION_CHAT_ENABLED, 'yes' );
+t_eq( ALAS_Settings::is_chat_enabled(), true, 'chat enabled by default value' );
+$widget_with_chat = ALAS_Settings::is_widget_configured();
+update_option( ALAS_Settings::OPTION_CHAT_ENABLED, '' );
+t_eq( ALAS_Settings::is_chat_enabled(), false, 'unticked checkbox disables chat' );
+t_eq( ALAS_Settings::is_widget_configured(), false, 'chat off hides the widget' );
+t_eq( ALAS_Settings::is_configured(), true, 'chat off keeps tracking configured' );
+update_option( ALAS_Settings::OPTION_CHAT_ENABLED, 'yes' );
+t_eq( ALAS_Settings::is_widget_configured(), $widget_with_chat, 'chat back on restores the widget' );
+update_option( ALAS_Settings::OPTION_CHAT_ENABLED, $saved_chat );
+
+echo "== M. Proxy/CDN trust checkbox ==\n";
+$saved_proxy  = get_option( ALAS_Settings::OPTION_TRUST_PROXY, '' );
+$saved_remote = $_SERVER['REMOTE_ADDR'] ?? null;
+$saved_xff    = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? null;
+$_SERVER['REMOTE_ADDR']          = '203.0.113.7';
+$_SERVER['HTTP_X_FORWARDED_FOR'] = '198.51.100.1, 10.0.0.1';
+update_option( ALAS_Settings::OPTION_TRUST_PROXY, '' );
+t_eq( ALAS_Payloads::client_ip(), '203.0.113.7', 'checkbox off ignores X-Forwarded-For' );
+update_option( ALAS_Settings::OPTION_TRUST_PROXY, 'yes' );
+t_eq( ALAS_Payloads::client_ip(), '198.51.100.1', 'checkbox on uses rightmost public hop' );
+update_option( ALAS_Settings::OPTION_TRUST_PROXY, '' );
+add_filter( 'amper_las_trust_forwarded_for', '__return_true' );
+t_eq( ALAS_Payloads::client_ip(), '198.51.100.1', 'legacy filter still wins over checkbox' );
+remove_filter( 'amper_las_trust_forwarded_for', '__return_true' );
+update_option( ALAS_Settings::OPTION_TRUST_PROXY, $saved_proxy );
+if ( null === $saved_remote ) { unset( $_SERVER['REMOTE_ADDR'] ); } else { $_SERVER['REMOTE_ADDR'] = $saved_remote; }
+if ( null === $saved_xff ) { unset( $_SERVER['HTTP_X_FORWARDED_FOR'] ); } else { $_SERVER['HTTP_X_FORWARDED_FOR'] = $saved_xff; }
+
 echo "\nRESULT: {$GLOBALS['alas_pass']} passed, {$GLOBALS['alas_fail']} failed\n";
 if ( $GLOBALS['alas_fail'] > 0 ) { exit( 1 ); }
