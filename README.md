@@ -41,6 +41,9 @@ No. New versions are installed automatically, just like other WordPress plugins.
 **How do I pause sending data?**
 In **WooCommerce → Live Assisted Sales**, untick **Integration enabled**. Deactivating the plugin also stops everything, and uninstalling it removes its settings and the event queue from your WordPress database.
 
+**Can I hide only the chat bubble?**
+Yes. In **WooCommerce → Live Assisted Sales**, untick **Chat widget** - the bubble disappears, while visitor tracking and the live console keep working.
+
 **What about my customers' data?**
 EU visitors see a consent banner first - without consent, no behavioural data and no personal data are sent to the AMPER platform. For details, see our [Terms of Service](https://live-assisted-sales.com/terms/) and [Privacy Policy](https://live-assisted-sales.com/privacy/).
 

@@ -41,6 +41,9 @@ Nie. Nowe wersje będą instalowane automatycznie, tak jak w przypadku innych wt
 **Jak wstrzymać wysyłanie danych?**
 W **WooCommerce → Live Assisted Sales** odznacz **Integracja włączona**. Wyłączenie wtyczki też zatrzymuje wszystko, a jej odinstalowanie usuwa ustawienia i kolejkę zdarzeń z lokalnej bazy danych WordPressa.
 
+**Czy mogę ukryć sam dymek czatu?**
+Tak. W **WooCommerce → Live Assisted Sales** odznacz **Widget czatu** - dymek zniknie, a śledzenie odwiedzających i konsola na żywo będą dalej działać.
+
 **Co z danymi moich klientów?**
 Odwiedzający z UE najpierw widzą baner zgody - bez zgody dane o zachowaniu ani dane osobowe nie są wysyłane do platformy AMPER. Szczegółowe informacje znajdziesz w naszym [Regulaminie](https://live-assisted-sales.com/terms/) oraz [Polityce prywatności](https://live-assisted-sales.com/privacy/).
 

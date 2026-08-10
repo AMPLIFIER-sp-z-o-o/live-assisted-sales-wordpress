@@ -119,6 +119,8 @@ Provisioned 1:1 like the local store (same catalog, shipping, payments, coupon, 
 - **LAS platform address** - server-side URL (Docker: `http://host.docker.internal:8001`).
 - **Public widget address** (optional) - browser-side URL when it differs (Docker: `http://localhost:8001`); empty in production.
 - **Store API key** - the TrackedSite write_key; "Test connection" fetches the public widget key (`site_pk_...`) - the widget appears only after a successful test.
+- **Chat widget** (since 1.0.18) - hides only the chat bubble; visitor tracking and the live console keep working.
+- **Proxy / CDN** (since 1.0.18) - trust the X-Forwarded-For chain for shopper IPs (`amper_las_trust_proxy`); the `amper_las_trust_forwarded_for` filter still takes precedence for existing installs. Off by default because the header is client-supplied on a store without a rewriting proxy.
 
 ## Event taxonomy (GA4, same as b2c)
 
