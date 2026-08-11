@@ -134,3 +134,11 @@ msgstr ""
 
 msgid "Could not prepare the update package."
 msgstr ""
+
+#, php-format
+msgid "Could not reach AMPER LAS (%s). Nothing was changed - try again in a moment, or paste the API key manually below."
+msgstr ""
+
+#, php-format
+msgid "AMPER LAS did not accept the connection address (HTTP %d). Nothing was changed - check the LAS platform address, or paste the API key manually below."
+msgstr ""

@@ -64,6 +64,15 @@ ck( 400 === $c2, 'a request with no code is refused', $c2 );
 list( $c3, $b3 ) = $post( array( 'code' => 'x', 'verifier' => 'y', 'site_url' => home_url() ) );
 ck( 400 === $c3 && false === strpos( $b3, 'write_key' ), 'a refusal never leaks a key', $c3 );
 
+echo "== preflight guards the start redirect ==\n";
+// The start button must never bounce the merchant to a dead platform: every failure has to surface
+// as a notice in wp-admin, next to the manual key method.
+ck( null === ALAS_Connect::preflight_error( $base ), 'live platform passes the preflight' );
+$err = ALAS_Connect::preflight_error( 'http://127.0.0.1:1' );
+ck( is_string( $err ) && '' !== $err, 'a dead address is caught before the browser leaves wp-admin' );
+$err404 = ALAS_Connect::preflight_error( $base . '/no-such-app' );
+ck( is_string( $err404 ) && false !== strpos( $err404, 'HTTP 404' ), 'a wrong address is caught with its status named', (string) $err404 );
+
 echo "== return handler is guarded ==\n";
 delete_site_transient( ALAS_Connect::HANDSHAKE_KEY );
 ck( false === get_site_transient( ALAS_Connect::HANDSHAKE_KEY ), 'no handshake in flight' );

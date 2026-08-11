@@ -68,6 +68,11 @@ class ALAS_Connect {
 			self::fail( __( 'Set the LAS platform address first.', 'amper-live-assisted-sales' ) );
 		}
 
+		$preflight = self::preflight_error( $base );
+		if ( null !== $preflight ) {
+			self::fail( $preflight );
+		}
+
 		$verifier = wp_generate_password( 64, false, false );
 		$state    = wp_generate_password( 32, false, false );
 		set_site_transient(
@@ -78,6 +83,38 @@ class ALAS_Connect {
 
 		wp_redirect( self::connect_redirect_url( $state, $verifier ) );
 		exit;
+	}
+
+	/**
+	 * Why the connect screen on the platform cannot be reached, or null when it can.
+	 *
+	 * A blind redirect to a dead or misconfigured platform would strand the merchant on a foreign
+	 * error page with no way back to wp-admin. One cheap probe first keeps every failure on this
+	 * screen, where the error notice and the manual key method both live. The probe uses the SERVER
+	 * address on purpose: the public one may be unreachable from this server (Docker), and the
+	 * code-for-key exchange will need the server address to work anyway.
+	 */
+	public static function preflight_error( $base ) {
+		$probe = wp_remote_head(
+			trailingslashit( $base ) . 'integrations/wordpress/connect/',
+			array( 'timeout' => 10 )
+		);
+		if ( is_wp_error( $probe ) ) {
+			return sprintf(
+				/* translators: %s: network error message. */
+				__( 'Could not reach AMPER LAS (%s). Nothing was changed - try again in a moment, or paste the API key manually below.', 'amper-live-assisted-sales' ),
+				$probe->get_error_message()
+			);
+		}
+		$status = (int) wp_remote_retrieve_response_code( $probe );
+		if ( $status >= 400 ) {
+			return sprintf(
+				/* translators: %d: HTTP status code returned by the LAS platform. */
+				__( 'AMPER LAS did not accept the connection address (HTTP %d). Nothing was changed - check the LAS platform address, or paste the API key manually below.', 'amper-live-assisted-sales' ),
+				$status
+			);
+		}
+		return null;
 	}
 
 	/**

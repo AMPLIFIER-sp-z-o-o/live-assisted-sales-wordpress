@@ -23,10 +23,20 @@ Do korzystania z wtyczki wymagane jest konto w usłudze AMPER Live Assisted Sale
 1. Pobierz plik wtyczki: [amper-live-assisted-sales.zip](https://github.com/AMPLIFIER-sp-z-o-o/live-assisted-sales-wordpress/releases/download/latest/amper-live-assisted-sales.zip).
 2. Zaloguj się do panelu swojego sklepu (`twojsklep.pl/wp-admin`).
 3. Wejdź w **Wtyczki → Dodaj wtyczkę → Wyślij wtyczkę na serwer**.
+
+   ![Panel WordPressa: Wtyczki → Dodaj wtyczkę, z otwartym polem wysyłania pliku wtyczki](docs/install/wp-upload-plugin.png)
+
 4. Wybierz plik `amper-live-assisted-sales.zip`, kliknij **Zainstaluj**, a potem **Włącz wtyczkę**.
 5. Po aktywacji wtyczka sama otworzy stronę ustawień. Gdyby tak się nie stało, kliknij odnośnik **Ustawienia** przy wtyczce lub przejdź do **WooCommerce → Live Assisted Sales**.
 6. Kliknij **Połącz z AMPER LAS**. Przeniesiemy Cię na live-assisted-sales.com, gdzie logujesz się (lub zakładasz konto) i potwierdzasz połączenie jednym kliknięciem. Klucz API zostanie zapisany automatycznie - nie musisz niczego kopiować ani wklejać.
-7. Gotowe. Dymek czatu pojawia się w sklepie, a w konsoli na live-assisted-sales.com widzisz ruch w czasie rzeczywistym.
+
+   ![Strona ustawień wtyczki z przyciskiem "Połącz z AMPER LAS"](docs/install/wp-connect-button.png)
+
+   ![Ekran potwierdzenia na live-assisted-sales.com z przyciskiem połączenia sklepu](docs/install/las-connect-confirm.png)
+
+7. Gotowe. Dymek czatu pojawia się w sklepie, a w konsoli na live-assisted-sales.com widzisz ruch w czasie rzeczywistym. Na stronie ustawień wtyczki zobaczysz zielony komunikat, że połączenie działa poprawnie.
+
+   ![Strona ustawień wtyczki po połączeniu - zielony komunikat o działającym połączeniu](docs/install/wp-settings-connected.png)
 
 Możesz również połączyć sklep ręcznie: na stronie ustawień wklej **Klucz API sklepu** ze strony Twojego sklepu w konsoli, zapisz i kliknij **Przetestuj połączenie**.
 

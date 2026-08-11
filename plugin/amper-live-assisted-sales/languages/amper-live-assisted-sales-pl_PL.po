@@ -214,3 +214,11 @@ msgstr "Mój sklep działa za proxy lub CDN (np. Cloudflare)"
 
 msgid "Tick only in that case: the console will then read visitor addresses from the proxy's X-Forwarded-For header. On a store without a proxy this header can be forged by visitors, so leave it off."
 msgstr "Zaznacz tylko w takim przypadku: konsola odczyta wtedy adresy odwiedzających z nagłówka X-Forwarded-For od proxy. W sklepie bez proxy ten nagłówek może być sfałszowany przez odwiedzających, więc zostaw wyłączone."
+
+#, php-format
+msgid "Could not reach AMPER LAS (%s). Nothing was changed - try again in a moment, or paste the API key manually below."
+msgstr "Nie udało się połączyć z AMPER LAS (%s). Nic nie zostało zmienione - spróbuj ponownie za chwilę albo wklej klucz API ręcznie poniżej."
+
+#, php-format
+msgid "AMPER LAS did not accept the connection address (HTTP %d). Nothing was changed - check the LAS platform address, or paste the API key manually below."
+msgstr "AMPER LAS nie przyjął adresu połączenia (HTTP %d). Nic nie zostało zmienione - sprawdź adres platformy LAS albo wklej klucz API ręcznie poniżej."
