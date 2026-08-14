@@ -289,5 +289,105 @@ update_option( ALAS_Settings::OPTION_TRUST_PROXY, $saved_proxy );
 if ( null === $saved_remote ) { unset( $_SERVER['REMOTE_ADDR'] ); } else { $_SERVER['REMOTE_ADDR'] = $saved_remote; }
 if ( null === $saved_xff ) { unset( $_SERVER['HTTP_X_FORWARDED_FOR'] ); } else { $_SERVER['HTTP_X_FORWARDED_FOR'] = $saved_xff; }
 
+echo "== N. Product search for the LAS agent picker ==\n";
+$saved_key     = get_option( ALAS_Settings::OPTION_API_KEY, '' );
+$saved_enabled = get_option( ALAS_Settings::OPTION_ENABLED, 'yes' );
+update_option( ALAS_Settings::OPTION_API_KEY, 'search-secret' );
+update_option( ALAS_Settings::OPTION_ENABLED, 'yes' );
+
+function alas_search_request( $body, $timestamp = null, $signature = null, $secret = 'search-secret' ) {
+	$timestamp = null === $timestamp ? (string) time() : (string) $timestamp;
+	$request   = new WP_REST_Request( 'POST', '/amper-las/v1/product-search' );
+	$request->set_header( 'content-type', 'application/json' );
+	$request->set_body( $body );
+	$request->set_header( 'x_amper_timestamp', $timestamp );
+	$request->set_header(
+		'x_amper_signature',
+		null === $signature ? 'sha256=' . hash_hmac( 'sha256', $timestamp . '.' . $body, $secret ) : $signature
+	);
+	return $request;
+}
+
+$body     = wp_json_encode( array( 'query' => 'pepsi', 'limit' => 5 ) );
+$response = ALAS_Search::handle( alas_search_request( $body ) );
+t_eq( $response->get_status(), 200, 'signed search is accepted' );
+t_ok( is_array( $response->get_data()['results'] ), 'signed search returns a results array' );
+
+$response = ALAS_Search::handle( alas_search_request( $body, null, null, 'wrong-secret' ) );
+t_eq( $response->get_status(), 403, 'wrong key is refused' );
+
+$response = ALAS_Search::handle( alas_search_request( $body, (string) ( time() - 3600 ) ) );
+t_eq( $response->get_status(), 403, 'replayed old request is refused' );
+
+$response = ALAS_Search::handle( alas_search_request( $body, (string) ( time() + 3600 ) ) );
+t_eq( $response->get_status(), 403, 'future timestamp is refused' );
+
+$response = ALAS_Search::handle( alas_search_request( $body, 'not-a-number' ) );
+t_eq( $response->get_status(), 403, 'non-numeric timestamp is refused' );
+
+// Sign one body, send another: the signature covers the payload.
+$tampered = alas_search_request( $body );
+$tampered->set_body( wp_json_encode( array( 'query' => 'whisky' ) ) );
+t_eq( ALAS_Search::handle( $tampered )->get_status(), 403, 'tampered body is refused' );
+
+$unsigned = new WP_REST_Request( 'POST', '/amper-las/v1/product-search' );
+$unsigned->set_body( $body );
+t_eq( ALAS_Search::handle( $unsigned )->get_status(), 403, 'unsigned request is refused' );
+
+$response = ALAS_Search::handle( alas_search_request( '{not json' ) );
+t_eq( $response->get_status(), 400, 'invalid JSON is a bad request' );
+
+$blank = wp_json_encode( array( 'query' => '   ' ) );
+t_eq( ALAS_Search::handle( alas_search_request( $blank ) )->get_data()['results'], array(), 'blank query returns nothing' );
+
+update_option( ALAS_Settings::OPTION_API_KEY, '' );
+t_eq(
+	ALAS_Search::handle( alas_search_request( $body, null, null, '' ) )->get_status(),
+	403,
+	'unconfigured key keeps the catalogue shut'
+);
+update_option( ALAS_Settings::OPTION_API_KEY, 'search-secret' );
+
+update_option( ALAS_Settings::OPTION_ENABLED, 'no' );
+t_eq( ALAS_Search::handle( alas_search_request( $body ) )->get_status(), 403, 'disabled integration answers nothing' );
+update_option( ALAS_Settings::OPTION_ENABLED, 'yes' );
+
+t_ok( strpos( ALAS_Search::endpoint_url(), '/amper-las/v1/product-search' ) !== false, 'announced URL points at the route' );
+
+// A real catalogue lookup: only published, catalogue-visible products may reach an agent.
+if ( function_exists( 'wc_get_product' ) ) {
+	$visible = new WC_Product_Simple();
+	$visible->set_name( 'Pepsi zgrzewka testowa' );
+	$visible->set_regular_price( '119.76' );
+	$visible->set_catalog_visibility( 'visible' );
+	$visible->set_status( 'publish' );
+	$visible_id = $visible->save();
+
+	$hidden = new WC_Product_Simple();
+	$hidden->set_name( 'Pepsi ukryta testowa' );
+	$hidden->set_regular_price( '9.99' );
+	$hidden->set_status( 'draft' );
+	$hidden_id = $hidden->save();
+
+	$data  = ALAS_Search::handle( alas_search_request( wp_json_encode( array( 'query' => 'Pepsi' ) ) ) )->get_data();
+	$names = wp_list_pluck( $data['results'], 'name' );
+	t_ok( in_array( 'Pepsi zgrzewka testowa', $names, true ), 'published product is findable' );
+	t_ok( ! in_array( 'Pepsi ukryta testowa', $names, true ), 'draft product never reaches the agent' );
+
+	$row = null;
+	foreach ( $data['results'] as $candidate ) {
+		if ( 'Pepsi zgrzewka testowa' === $candidate['name'] ) { $row = $candidate; }
+	}
+	t_ok( is_array( $row ) && '' !== $row['price'], 'card carries a formatted price' );
+	t_ok( is_array( $row ) && strpos( $row['url'], 'http' ) === 0, 'card carries an absolute link' );
+	t_eq( is_array( $row ) ? $row['availability'] : '', 'in_stock', 'in-stock product is reported as available' );
+
+	wp_delete_post( $visible_id, true );
+	wp_delete_post( $hidden_id, true );
+}
+
+update_option( ALAS_Settings::OPTION_API_KEY, $saved_key );
+update_option( ALAS_Settings::OPTION_ENABLED, $saved_enabled );
+
 echo "\nRESULT: {$GLOBALS['alas_pass']} passed, {$GLOBALS['alas_fail']} failed\n";
 if ( $GLOBALS['alas_fail'] > 0 ) { exit( 1 ); }

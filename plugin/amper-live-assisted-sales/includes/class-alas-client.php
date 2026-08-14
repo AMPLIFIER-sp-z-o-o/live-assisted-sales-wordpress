@@ -47,6 +47,23 @@ class ALAS_Client {
 	}
 
 	/**
+	 * Tells LAS where this shop answers product searches.
+	 *
+	 * LAS deliberately knows no platform types, so every integration reports its own endpoint
+	 * instead of LAS deriving one per platform. An empty string withdraws the capability.
+	 *
+	 * @param string $product_search_url Absolute URL, or '' to withdraw.
+	 * @return array|WP_Error
+	 */
+	public static function announce_capabilities( $product_search_url ) {
+		return self::request(
+			'/api/ingest/store-events/config/',
+			'POST',
+			array( 'product_search_url' => (string) $product_search_url )
+		);
+	}
+
+	/**
 	 * Delivers one event to LAS.
 	 *
 	 * @param array $payload  The full event envelope.

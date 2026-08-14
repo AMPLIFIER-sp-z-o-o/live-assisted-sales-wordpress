@@ -37,6 +37,7 @@ require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-outbox.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-dispatch.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-tracking.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-rest.php';
+require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-search.php';
 require_once AMPER_LAS_PLUGIN_DIR . 'includes/class-alas-frontend.php';
 // The self-updater ships only in the GitHub-distributed build. The wordpress.org build removes
 // the file (directory guideline 8 forbids serving updates from anywhere but wordpress.org) and
@@ -77,6 +78,7 @@ add_action( 'plugins_loaded', function () {
 	ALAS_Outbox::init();
 	ALAS_Tracking::init();
 	ALAS_Rest::init();
+	ALAS_Search::init();
 	ALAS_Frontend::init();
 } );
 

@@ -395,6 +395,27 @@ class ALAS_Settings {
 		/* translators: %s: store name. */
 		$message = sprintf( __( 'Connection to %s works correctly.', 'amper-live-assisted-sales' ), $store_name ? $store_name : __( 'your store', 'amper-live-assisted-sales' ) );
 		self::record_test_result( 'success', $message );
+		self::announce_product_search();
 		return array( 'ok' => true, 'message' => $message );
+	}
+
+	/**
+	 * Registers this shop's product-search endpoint with LAS.
+	 *
+	 * Best-effort by design: an older LAS that does not understand the field, or a network blip,
+	 * must never turn a working connection test into a failure - the agent's picker simply falls
+	 * back to the catalogue LAS inferred from traffic.
+	 *
+	 * @return void
+	 */
+	private static function announce_product_search() {
+		if ( ! class_exists( 'ALAS_Search' ) ) {
+			return;
+		}
+		$url = ALAS_Search::endpoint_url();
+		if ( ! $url ) {
+			return;
+		}
+		ALAS_Client::announce_capabilities( $url );
 	}
 }
